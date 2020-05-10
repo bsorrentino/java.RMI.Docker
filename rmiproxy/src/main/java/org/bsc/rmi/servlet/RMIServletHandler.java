@@ -538,9 +538,11 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 throw new ServletClientException("error reading request body");
             }
 
+            final String rmihost = System.getenv("RMI_REMOTE_HOST");
+
             // send to local server in HTTP
             try (
-                    final Socket socket = new Socket(InetAddress.getLocalHost(), port);
+                    final Socket socket = new Socket( (rmihost!=null) ? InetAddress.getByName(rmihost) : InetAddress.getLocalHost(), port);
                     final DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());
                     final DataInputStream socketIn = new DataInputStream(socket.getInputStream());
                 )

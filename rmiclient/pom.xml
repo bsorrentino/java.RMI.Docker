@@ -93,13 +93,15 @@
                 <configuration>
                     <executable>java</executable>
                     <arguments>
+                        <argument>-Dhttp.proxyHost=localhost</argument>
+                        <argument>-Dhttp.proxyPort=80</argument>
                         <argument>-classpath</argument>
                         <classpath/>
                         <argument>com.javacodegeeks.core.rmi.remoteclient.RemoteClient</argument>
                     </arguments>
                     <environmentVariables>
-                            <RMI_REMOTE_HOST>192.168.1.145</RMI_REMOTE_HOST>
-                            <RMI_REMOTE_PORT>1099</RMI_REMOTE_PORT>
+                        <RMI_REMOTE_HOST>localhost</RMI_REMOTE_HOST>
+                        <RMI_REMOTE_PORT>1099</RMI_REMOTE_PORT>
                     </environmentVariables>
                 </configuration>
             </plugin>
@@ -111,6 +113,13 @@
             <artifactId>rmiInterface</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.javacodegeeks.core.rmi</groupId>
+            <artifactId>rmiproxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
     
 </project>

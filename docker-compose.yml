@@ -4,11 +4,22 @@ services:
     container_name: RMI_SERVER
     image: rmiserver:latest
     entrypoint: /bin/sh -c ./launchServer.sh
-    ports:
-      - '1099:1099'
     environment:
       RMI_REMOTE_PORT: 1099
       RMI_REMOTE_HOST: RMI_SERVER
+  RMI_HTTPPROXY:
+    container_name: RMI_HTTPPROXY
+    image: rmihttpproxy:latest
+    entrypoint: /bin/sh -c ./launchServer.sh
+    ports:
+      - '80:80'
+    environment:
+      RMI_REMOTE_PORT: 1099
+      RMI_REMOTE_HOST: RMI_SERVER
+    depends_on:
+      - RMI_SERVER
+    links:
+      - 'RMI_SERVER'
   RMI_CLIENT:
     container_name: RMI_CLIENT
     image: rmiclient:latest
