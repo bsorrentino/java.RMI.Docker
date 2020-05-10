@@ -81,14 +81,12 @@ public class SampleRMIClient {
 	     */
 	    RMISocketFactory.setSocketFactory( new sun.rmi.transport.proxy.RMIHttpToCGISocketFactory() );
 	    
+	    System.setSecurityManager(new SecurityManager());
 
-	    System.setSecurityManager(new RMISecurityManager());
-	    SampleRMI sampleRMI = (SampleRMI) Naming.
-		lookup("rmi://" + args[0] + "/SampleRMI");
+	    SampleRMI sampleRMI = (SampleRMI) Naming.lookup("rmi://" + args[0] + "/SampleRMI");
 
 	    // Invoke a single remote call to test the servlet.
-	    System.out.println(sampleRMI.justPass("This is a test of the RMI " + 
-						  "servlet handler"));
+	    System.out.println(sampleRMI.justPass("This is a test of the RMI servlet handler"));
 	    System.out.println("Servlet installed correctly.");
 	    System.exit(0);
 	    
