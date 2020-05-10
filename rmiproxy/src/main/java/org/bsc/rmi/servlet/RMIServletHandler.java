@@ -1,42 +1,4 @@
-/*
- * Copyright 2002 Sun Microsystems, Inc. All  Rights Reserved.
- *
- * Redistribution and use in source and binary forms, with or
- * without modification, are permitted provided that the following
- * conditions are met:
- *
- * -Redistributions of source code must retain the above copyright
- *  notice, this list of conditions and the following disclaimer.
- *
- * -Redistribution in binary form must reproduce the above copyright
- *  notice, this list of conditions and the following disclaimer in
- *  the documentation and/or other materials provided with the
- *  distribution.
- *
- * Neither the name of Sun Microsystems, Inc. or the names of
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
- *
- * This software is provided "AS IS," without a warranty of any
- * kind. ALL EXPRESS OR IMPLIED CONDITIONS, REPRESENTATIONS AND
- * WARRANTIES, INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT, ARE HEREBY
- * EXCLUDED. SUN AND ITS LICENSORS SHALL NOT BE LIABLE FOR ANY
- * DAMAGES OR LIABILITIES  SUFFERED BY LICENSEE AS A RESULT OF OR
- * RELATING TO USE, MODIFICATION OR DISTRIBUTION OF THE SOFTWARE OR
- * ITS DERIVATIVES. IN NO EVENT WILL SUN OR ITS LICENSORS BE LIABLE
- * FOR ANY LOST REVENUE, PROFIT OR DATA, OR FOR DIRECT, INDIRECT,
- * SPECIAL, CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER
- * CAUSED AND REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF
- * THE USE OF OR INABILITY TO USE SOFTWARE, EVEN IF SUN HAS BEEN
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- *
- * You acknowledge that Software is not designed, licensed or
- * intended for use in the design, construction, operation or
- * maintenance of any nuclear facility.
- */
-
-package samplermi;
+package org.bsc.rmi.servlet;
 
 import java.io.*;
 import java.net.*;
@@ -111,18 +73,6 @@ import static java.lang.String.format;
  * webserver1.0.2/apidoc/Package-javax.servlet.http.html
  */
 public class RMIServletHandler extends HttpServlet implements Runnable {
-
-    static void _L( String msg, Object...args ) {
-        System.out.println( "===>");
-        System.out.printf( msg, args);
-        System.out.println("\n<===");
-    }
-
-    static void _L( Throwable ex ) {
-        System.out.println( "===>");
-        ex.printStackTrace();
-        System.out.println("\n<===");
-    }
 
     /* Variables to hold optional configuration properties. */
 
@@ -600,23 +550,19 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 socketOut.write(buffer);
                 socketOut.flush();
 
-                String key = "Content-length:".toLowerCase();
+                final String key = "Content-length:".toLowerCase();
                 boolean contentLengthFound = false;
                 String line;
                 int responseContentLength = -1;
                 do {
                     line = socketIn.readLine();
-
-                    _L( "LINE:[%s]", line );
-
                     if (line == null)
                         throw new ServletServerException("unexpected EOF reading server response");
 
                     if (line.toLowerCase().startsWith(key)) {
                         if (contentLengthFound)
                             ; // what would we want to do in this case??
-                        responseContentLength =
-                                Integer.parseInt(line.substring(key.length()).trim());
+                        responseContentLength = Integer.parseInt(line.substring(key.length()).trim());
                         contentLengthFound = true;
                     }
                 } while ((line.length() != 0) &&
@@ -642,7 +588,6 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 out.flush();
 
             } catch (IOException e) {
-                _L(e);
                 throw new ServletServerException( format("error reading/writing to server: [%s]", e.getMessage()));
             }
 
