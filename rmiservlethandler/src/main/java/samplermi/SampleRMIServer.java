@@ -43,8 +43,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
+import sun.rmi.transport.proxy.RMIHttpToPortSocketFactory;
 
 import java.rmi.*;
+import java.rmi.registry.Registry;
 import java.rmi.server.*;
 
 import static java.lang.String.format;
@@ -52,26 +55,35 @@ import static java.lang.String.format;
 /**
  * Remote object to receive calls forwarded from the ServletHandler.
  */
-public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject
-        implements SampleRMI {
+public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject implements SampleRMI {
 
     public SampleRMIServer() throws RemoteException {
+        super();
     }
-
-    ;
 
     public String justPass(String passed) throws RemoteException {
-        return "String passed to remote server: " + passed;
+        System.out.printf("justPass( '%s' )\n", passed );
+        return format( "string passed to remote server is [%s]", passed) ;
     }
 
-    private static Server server;
+    @Override
+    public String getInfo() throws RemoteException {
+        return "I'm a RMI server";
+    }
+
     /**
      * You should not need to run this server from the command line.
      * The ServletHandler class creates its own instance of the
      * rmiregistry and (optionally) an instance of this class as well.
      * This main method will not be executed from the ServletHandler.
      */
+
+    static Registry reg ;
+
     public static void main(String args[]) {
+
+        final RMIServerSocketFactory serverSocketFactory = new RMIHttpToCGISocketFactory();
+        final RMIClientSocketFactory clientSocketFactory = null;
 
         System.out.printf( format( "java.security.policy=[%s]\n", System.getProperty("java.security.policy")));
         try {
@@ -79,7 +91,10 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject
 
             // create a registry if one is not running already.
             try {
-                java.rmi.registry.LocateRegistry.createRegistry(1099);
+                reg = java.rmi.registry.LocateRegistry.createRegistry(1099, clientSocketFactory, serverSocketFactory);
+
+                reg.bind( "SampleRMI", new SampleRMIServer() );
+
             } catch (java.rmi.server.ExportException ee) {
                 // registry already exists, we'll just use it.
             } catch (RemoteException re) {
@@ -87,28 +102,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject
                 re.printStackTrace();
             }
 
-
-            int maxThreads = 100;
-            int minThreads = 10;
-            int idleTimeout = 120;
-
-            QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads, idleTimeout);
-
-            server = new Server(threadPool);
-            ServerConnector connector = new ServerConnector(server);
-            connector.setPort(80);
-            server.setConnectors(new Connector[] { connector });
-
-            ServletHandler servletHandler = new ServletHandler();
-            server.setHandler(servletHandler);
-
-            servletHandler.addServletWithMapping(RMIServletHandler.class, "/");
-
-            server.start();
-
-            System.out.println( "jetty started!");
-
-            Naming.rebind("/SampleRMI", new SampleRMIServer());
+            //Naming.rebind("/SampleRMI", new SampleRMIServer());
 
         } catch (Exception e) {
             e.printStackTrace();

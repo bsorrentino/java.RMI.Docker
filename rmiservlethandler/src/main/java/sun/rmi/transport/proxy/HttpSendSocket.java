@@ -141,8 +141,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
     public synchronized OutputStream writeNotify() throws IOException
     {
         if (conn != null) {
-            throw new IOException("attempt to write on HttpSendSocket after " +
-                                  "request has been sent");
+            throw new IOException("attempt to write on HttpSendSocket after request has been sent");
         }
 
         conn = url.openConnection();

@@ -52,6 +52,8 @@ import java.rmi.registry.LocateRegistry;
 import javax.servlet.http.*;
 import javax.servlet.*;
 
+import static java.lang.String.format;
+
 /**
  * The default RMI socket factory contains several "fallback"
  * mechanisms which enable an RMI client to communicate with a remote
@@ -108,8 +110,19 @@ import javax.servlet.*;
  * http://jserv.javasoft.com/products/java-server/documentation/
  * webserver1.0.2/apidoc/Package-javax.servlet.http.html
  */
-public class RMIServletHandler extends HttpServlet
-        implements Runnable {
+public class RMIServletHandler extends HttpServlet implements Runnable {
+
+    static void _L( String msg, Object...args ) {
+        System.out.println( "===>");
+        System.out.printf( msg, args);
+        System.out.println("\n<===");
+    }
+
+    static void _L( Throwable ex ) {
+        System.out.println( "===>");
+        ex.printStackTrace();
+        System.out.println("\n<===");
+    }
 
     /* Variables to hold optional configuration properties. */
 
@@ -202,9 +215,7 @@ public class RMIServletHandler extends HttpServlet
             if (!verifyConfigParameters()) {
                 // dont export any objects.
 
-                System.err.println("Some optional parameters not set, " +
-                        "remote object not exported; " +
-                        "ServletHandler is runnning.");
+                System.err.println("Some optional parameters not set, remote object not exported; ServletHandler is runnning.");
 
                 return;
             }
@@ -215,7 +226,7 @@ public class RMIServletHandler extends HttpServlet
              * installed.
              */
             if (System.getSecurityManager() == null) {
-                System.setSecurityManager(new RMISecurityManager());
+                System.setSecurityManager(new SecurityManager());
             }
 
             // create a registry if one is not running already.
@@ -249,8 +260,7 @@ public class RMIServletHandler extends HttpServlet
      */
     public void run() {
         try {
-            UnicastRemoteObject server =
-                    createRemoteObjectUsingDownloadedClass();
+            final UnicastRemoteObject server = createRemoteObjectUsingDownloadedClass();
             if (server != null) {
                 Naming.rebind(initialServerBindName, server);
                 System.err.println("Remote object created successfully.");
@@ -270,8 +280,7 @@ public class RMIServletHandler extends HttpServlet
      * case of this example, that location will be
      * <code>initialServerCodebase</code>
      */
-    UnicastRemoteObject createRemoteObjectUsingDownloadedClass()
-            throws Exception {
+    UnicastRemoteObject createRemoteObjectUsingDownloadedClass() throws Exception {
         UnicastRemoteObject server = null;
         Class serverClass = null;
 
@@ -282,9 +291,7 @@ public class RMIServletHandler extends HttpServlet
         while ((retry < MAX_RETRY) && (serverClass == null)) {
             try {
                 System.err.println("Attempting to load remote class...");
-                serverClass = RMIClassLoader.
-                        loadClass(new URL(initialServerCodebase),
-                                initialServerClass);
+                serverClass = RMIClassLoader.loadClass(new URL(initialServerCodebase), initialServerClass);
 
                 // Before we instantiate the obj. make sure it
                 // is a UnicastRemoteObject.
@@ -555,120 +562,92 @@ public class RMIServletHandler extends HttpServlet
          * @param res   The servlet response.
          * @param param Port to which data will be sent.
          */
-        public void execute(HttpServletRequest req, HttpServletResponse res,
-                            String param)
-                throws ServletClientException, ServletServerException, IOException {
+        public void execute(HttpServletRequest req, HttpServletResponse res, String param) throws ServletClientException, ServletServerException, IOException {
 
             int port;
             try {
                 port = Integer.parseInt(param);
             } catch (NumberFormatException e) {
-                throw new ServletClientException("invalid port number: " +
-                        param);
+                throw new ServletClientException( format("invalid port number: %s",param));
             }
             if (port <= 0 || port > 0xFFFF)
-                throw new ServletClientException("invalid port: " + port);
+                throw new ServletClientException( format("invalid port: %d", port));
             if (port < 1024)
-                throw new ServletClientException("permission denied for port: "
-                        + port);
+                throw new ServletClientException( format("permission denied for port: %d", port));
 
             byte buffer[];
-            Socket socket;
-            try {
-                socket = new Socket(InetAddress.getLocalHost(), port);
-            } catch (IOException e) {
-                throw new ServletServerException("could not connect to " +
-                        "local port");
-            }
 
             // read client's request body
-            DataInputStream clientIn =
-                    new DataInputStream(req.getInputStream());
+            DataInputStream clientIn = new DataInputStream(req.getInputStream());
             buffer = new byte[req.getContentLength()];
             try {
                 clientIn.readFully(buffer);
             } catch (EOFException e) {
-                throw new ServletClientException("unexpected EOF " +
-                        "reading request body");
+                throw new ServletClientException("unexpected EOF reading request body");
             } catch (IOException e) {
-                throw new ServletClientException("error reading request" +
-                        " body");
+                throw new ServletClientException("error reading request body");
             }
 
-            DataOutputStream socketOut = null;
             // send to local server in HTTP
-            try {
-                socketOut =
-                        new DataOutputStream(socket.getOutputStream());
+            try (
+                    final Socket socket = new Socket(InetAddress.getLocalHost(), port);
+                    final DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());
+                    final DataInputStream socketIn = new DataInputStream(socket.getInputStream());
+                )
+            {
                 socketOut.writeBytes("POST / HTTP/1.0\r\n");
-                socketOut.writeBytes("Content-length: " +
-                        req.getContentLength() + "\r\n\r\n");
+                socketOut.writeBytes( format("Content-length: %d\r\n\r\n", req.getContentLength()) );
                 socketOut.write(buffer);
                 socketOut.flush();
-            } catch (IOException e) {
-                throw new ServletServerException("error writing to server");
-            }
 
-            // read response from local server
-            DataInputStream socketIn;
-            try {
-                socketIn = new DataInputStream(socket.getInputStream());
-            } catch (IOException e) {
-                throw new ServletServerException("error reading from " +
-                        "server");
-            }
-            String key = "Content-length:".toLowerCase();
-            boolean contentLengthFound = false;
-            String line;
-            int responseContentLength = -1;
-            do {
-                try {
+                String key = "Content-length:".toLowerCase();
+                boolean contentLengthFound = false;
+                String line;
+                int responseContentLength = -1;
+                do {
                     line = socketIn.readLine();
-                } catch (IOException e) {
-                    throw new ServletServerException("error reading from server");
+
+                    _L( "LINE:[%s]", line );
+
+                    if (line == null)
+                        throw new ServletServerException("unexpected EOF reading server response");
+
+                    if (line.toLowerCase().startsWith(key)) {
+                        if (contentLengthFound)
+                            ; // what would we want to do in this case??
+                        responseContentLength =
+                                Integer.parseInt(line.substring(key.length()).trim());
+                        contentLengthFound = true;
+                    }
+                } while ((line.length() != 0) &&
+                        (line.charAt(0) != '\r') && (line.charAt(0) != '\n'));
+
+                if (!contentLengthFound || responseContentLength < 0)
+                    throw new ServletServerException("missing or invalid content length in server response");
+
+                byte bufferIn[] = new byte[responseContentLength];
+                try {
+                    socketIn.readFully(bufferIn);
+
+                } catch (EOFException e) {
+                    throw new ServletServerException("unexpected EOF reading server response");
                 }
-                if (line == null)
-                    throw new ServletServerException(
-                            "unexpected EOF reading server response");
+                // send local server response back to servlet client
+                res.setStatus(HttpServletResponse.SC_OK);
+                res.setContentType("application/octet-stream");
+                res.setContentLength(bufferIn.length);
 
-                if (line.toLowerCase().startsWith(key)) {
-                    if (contentLengthFound)
-                        ; // what would we want to do in this case??
-                    responseContentLength =
-                            Integer.parseInt(line.substring(key.length()).trim());
-                    contentLengthFound = true;
-                }
-            } while ((line.length() != 0) &&
-                    (line.charAt(0) != '\r') && (line.charAt(0) != '\n'));
-
-            if (!contentLengthFound || responseContentLength < 0)
-                throw new ServletServerException(
-                        "missing or invalid content length in server response");
-            buffer = new byte[responseContentLength];
-            try {
-                socketIn.readFully(buffer);
-            } catch (EOFException e) {
-                throw new ServletServerException(
-                        "unexpected EOF reading server response");
-            } catch (IOException e) {
-                throw new ServletServerException("error reading from server");
-            }
-
-            // send local server response back to servlet client
-            res.setStatus(HttpServletResponse.SC_OK);
-            res.setContentType("application/octet-stream");
-            res.setContentLength(buffer.length);
-
-            try {
                 OutputStream out = res.getOutputStream();
-                out.write(buffer);
+                out.write(bufferIn);
                 out.flush();
+
             } catch (IOException e) {
-                throw new ServletServerException("error writing response");
-            } finally {
-                socketOut.close();
-                socketIn.close();
+                _L(e);
+                throw new ServletServerException( format("error reading/writing to server: [%s]", e.getMessage()));
             }
+
+
+
         }
     }
 

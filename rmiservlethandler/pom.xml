@@ -38,6 +38,20 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
+                        <id>rmihttpproxy</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>
+                                <argument>-Djava.security.policy=${project.basedir}/java.policy</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>samplermi.RMIHttpProxy</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>rmiserver</id>
                         <goals>
                             <goal>exec</goal>
@@ -59,6 +73,10 @@
                         <configuration>
                             <arguments>
                                 <argument>-Djava.security.policy=${project.basedir}/java.policy</argument>
+                                <!--
+                                <argument>-D-Dhttp.proxyHost=localhost</argument>
+                                <argument>-D-Dhttp.proxyPort=80</argument>
+                                -->
                                 <argument>-classpath</argument>
                                 <classpath/>
                                 <argument>samplermi.SampleRMIClient</argument>

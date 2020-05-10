@@ -38,8 +38,14 @@
 
 package samplermi;
 
+import sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
+
 import java.rmi.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.*;
+
+import static java.lang.String.format;
 
 /**
  * RMI client to invoke calls through the ServletHandler
@@ -47,11 +53,8 @@ import java.rmi.server.*;
 public class SampleRMIClient { 
     public static void main(String args[]) {
 	try {
-	    if (args.length != 1 ) {
-		System.out.println("Usage: <hostname>");
-		System.exit(1);
-	    }
-	    
+
+		final String host = (args.length < 1 ) ? "localhost" : args[0];
 
 	    /*
 	     * NOTICE: To make this example easier to set-up and run,
@@ -79,11 +82,16 @@ public class SampleRMIClient {
 	     *   java -Dhttp.proxyHost=<proxyHost> -Dhttp.proxyPort=<proxyPort> 
 	     *       samplermi.SampleRMIClient <servletHostname> 
 	     */
-	    RMISocketFactory.setSocketFactory( new sun.rmi.transport.proxy.RMIHttpToCGISocketFactory() );
-	    
+
+		System.setProperty( "java.security.policy", "/Users/bsorrentino/WORKSPACES/GITHUB/java.RMI.Docker/rmiservlethandler/java.policy");
+
 	    System.setSecurityManager(new SecurityManager());
 
-	    SampleRMI sampleRMI = (SampleRMI) Naming.lookup("rmi://" + args[0] + "/SampleRMI");
+		final Registry reg = LocateRegistry.getRegistry( host, 1099, new RMIHttpToCGISocketFactory() );
+
+		final SampleRMI sampleRMI = (SampleRMI)reg.lookup("SampleRMI");
+
+	    //SampleRMI sampleRMI = (SampleRMI) Naming.lookup(format("rmi://%s/SampleRMI", host));
 
 	    // Invoke a single remote call to test the servlet.
 	    System.out.println(sampleRMI.justPass("This is a test of the RMI servlet handler"));

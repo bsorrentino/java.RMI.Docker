@@ -49,5 +49,7 @@ public interface SampleRMI extends java.rmi.Remote {
      * Test remote method.
      */
     String justPass(String toPass) throws java.rmi.RemoteException;
+
+    String getInfo() throws java.rmi.RemoteException;
 }
 
