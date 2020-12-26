@@ -36,25 +36,22 @@
  * maintenance of any nuclear facility.
  */
 
-package samplermi;
+package org.bsc.rmi.sample;
 
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import lombok.extern.java.Log;
 import sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
-import sun.rmi.transport.proxy.RMIHttpToPortSocketFactory;
 
 import java.rmi.*;
 import java.rmi.registry.Registry;
 import java.rmi.server.*;
+import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 
 /**
  * Remote object to receive calls forwarded from the ServletHandler.
  */
+@Log
 public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject implements SampleRMI {
 
     public SampleRMIServer() throws RemoteException {
@@ -62,7 +59,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
     }
 
     public String justPass(String passed) throws RemoteException {
-        System.out.printf("justPass( '%s' )\n", passed );
+        log.info( format( "justPass( '%s' )", passed ));
         return format( "string passed to remote server is [%s]", passed) ;
     }
 
@@ -78,34 +75,65 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
      * This main method will not be executed from the ServletHandler.
      */
 
-    static Registry reg ;
 
-    public static void main(String args[]) {
-
-        final RMIServerSocketFactory serverSocketFactory = new RMIHttpToCGISocketFactory();
-        final RMIClientSocketFactory clientSocketFactory = null;
-
-        System.out.printf( format( "java.security.policy=[%s]\n", System.getProperty("java.security.policy")));
+    private static CompletableFuture<Void> bind( Registry reg ) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            System.setSecurityManager(new SecurityManager());
+            reg.bind( "SampleRMI", new SampleRMIServer() );
+            result.complete( null );
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
 
-            // create a registry if one is not running already.
-            try {
-                reg = java.rmi.registry.LocateRegistry.createRegistry(1099, clientSocketFactory, serverSocketFactory);
+    private static CompletableFuture<Registry> createRMIRegistry( int port ) {
+        CompletableFuture<Registry> result = new CompletableFuture<>();
 
-                reg.bind( "SampleRMI", new SampleRMIServer() );
+        try {
+            final Registry reg = java.rmi.registry.LocateRegistry.createRegistry(port );
 
-            } catch (java.rmi.server.ExportException ee) {
-                // registry already exists, we'll just use it.
-            } catch (RemoteException re) {
-                System.err.println(re.getMessage());
-                re.printStackTrace();
-            }
-
-            //Naming.rebind("/SampleRMI", new SampleRMIServer());
+            result.complete(reg);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            result.completeExceptionally(e);
         }
+        return result;
+    }
+
+    private static CompletableFuture<Registry> createCustomRMIRegistry( int port ) {
+
+        final RMIServerSocketFactory serverSocketFactory = null;
+        final RMIClientSocketFactory clientSocketFactory = null;
+
+        CompletableFuture<Registry> result = new CompletableFuture<>();
+
+        try {
+            final Registry reg = java.rmi.registry.LocateRegistry.createRegistry(port, clientSocketFactory, serverSocketFactory );
+
+            result.complete(reg);
+
+        } catch (Exception e) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
+
+
+    /**
+     *
+     * @param args
+     */
+    public static void main(String args[]) {
+
+        log.info( format( "java.security.policy=[%s]", System.getProperty("java.security.policy")));
+
+        createRMIRegistry( 1099 )
+            .thenCompose( SampleRMIServer::bind )
+            .exceptionally( ex -> {
+                log.throwing(SampleRMIServer.class.getName(), "main", ex);
+                return null;
+            })
+            .join();
     }
 }

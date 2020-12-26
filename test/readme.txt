@@ -87,7 +87,7 @@ To run the ServletHandler perform the following steps:
        Sample Property names and example values: 
 
        rmiservlethandler.initialServerBindName -> /SampleRMI
-       rmiservlethandler.initialServerClass    -> samplermi.SampleRMIServer
+       rmiservlethandler.initialServerClass    -> SampleRMIServer
        rmiservlethandler.initialServerCodebase -> http://<machine>/<codebase>/
        
        Note: The codebase must end in '/'
@@ -105,7 +105,7 @@ To run the ServletHandler perform the following steps:
       If the ServletHandler loads properly, it should print out a
       success message:
 
-javawebserver: rmiservlethandler.initialServerClass  valid: samplermi.SampleRMIServer
+javawebserver: rmiservlethandler.initialServerClass  valid: SampleRMIServer
 javawebserver: rmiservlethandler.initialServerBindName  valid: SampleRMI
 javawebserver: rmiservlethandler.initialServerCodebase valid: http://<machine>/<codebase>/
 javawebserver: RMI Servlet Handler loaded sucessfully.
@@ -123,7 +123,7 @@ javawebserver: Remote object created successfully.
       also start the server from the command line (using the following
       command), if you do not set these properties:
 
-      java samplermi.SampleRMIServer
+      java SampleRMIServer
 
     * The ServletHandler and java-rmi.cgi will most often be invoked
       by an RMI client that resides inside a firewall.
@@ -141,13 +141,13 @@ javawebserver: Remote object created successfully.
 
     * To run the client, use the command:
 
-      java samplermi.SampleRMIClient <servletHostname>
+      java SampleRMIClient <servletHostname>
 
       When a firewall separates the client and server, you will need
       to set the client VM's proxy host properties as follows:
 
 java -Dhttp.proxyHost=<proxyHost> -Dhttp.proxyPort=<proxyPort>
-    samplermi.SampleRMIClient cycler.east.sun.com
+    SampleRMIClient cycler.east.sun.com
 
       If the servlet loaded correctly (with the optional remote
       server), you should see the following output from the servlet when

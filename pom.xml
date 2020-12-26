@@ -17,10 +17,12 @@
     </properties>
 
     <modules>
+        <!--
         <module>rmiinterface</module>
         <module>rmiserver</module>
         <module>rmiclient</module>
-        <module>rmiservlethandler</module>
+        -->
+        <module>test</module>
         <module>rmiproxy</module>
     </modules>
 
