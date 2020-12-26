@@ -5,6 +5,7 @@ import org.bsc.rmi.transport.proxy.http.RMISocketInfo;
 
 import java.io.*;
 import java.net.*;
+import java.security.PrivilegedAction;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
@@ -59,9 +60,9 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
      * property at the moment that the socket was created.
      */
     private String lineSeparator =
-        java.security.AccessController.doPrivileged(
-            new sun.security.action.GetPropertyAction("line.separator"));
-
+//        java.security.AccessController.doPrivileged(
+//            new sun.security.action.GetPropertyAction("line.separator"));
+            java.security.AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("line.separator"));
     /**
      * Create a stream socket and connect it to the specified port on
      * the specified host.
@@ -129,8 +130,9 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
 
         inNotifier.deactivate();
         in = null;
+        out = conn.getOutputStream();
 
-        return out = conn.getOutputStream();
+        return out;
     }
 
     /**

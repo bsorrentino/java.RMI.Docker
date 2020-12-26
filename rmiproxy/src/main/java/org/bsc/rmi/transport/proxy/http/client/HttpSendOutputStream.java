@@ -1,8 +1,8 @@
 package org.bsc.rmi.transport.proxy.http.client;
 
-import org.bsc.rmi.transport.proxy.http.client.HttpSendSocket;
-
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The HttpSendOutputStream class is used by the HttpSendSocket class as
@@ -13,7 +13,7 @@ import java.io.*;
 class HttpSendOutputStream extends FilterOutputStream {
 
     /** the HttpSendSocket object that is providing this stream */
-    HttpSendSocket owner;
+    final HttpSendSocket owner;
 
     /**
      * Create new filter on a given output stream.

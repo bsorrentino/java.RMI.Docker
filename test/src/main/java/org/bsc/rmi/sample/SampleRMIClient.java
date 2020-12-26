@@ -40,6 +40,7 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.http.client.RMIHttpClientSocketFactory;
 
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
@@ -54,6 +55,12 @@ import static java.lang.String.format;
 public class SampleRMIClient {
 
 
+    /**
+     *
+     * @param host
+     * @param port
+     * @return
+     */
     private static CompletableFuture<Registry> getRMIRegistry(@NonNull String host, int port) {
         CompletableFuture<Registry> result = new CompletableFuture<>();
 
@@ -68,9 +75,15 @@ public class SampleRMIClient {
         return result;
     }
 
+    /**
+     *
+     * @param host
+     * @param port
+     * @return
+     */
     private static CompletableFuture<Registry> getCustomRMIRegistry(@NonNull String host, int port) {
 
-        final RMIClientSocketFactory clientSocketFactory = null;
+        final RMIClientSocketFactory clientSocketFactory = new RMIHttpClientSocketFactory();
 
         CompletableFuture<Registry> result = new CompletableFuture<>();
 
@@ -151,7 +164,8 @@ public class SampleRMIClient {
 
         System.setSecurityManager(new SecurityManager());
 
-        getRMIRegistry(host, 1099)
+        getCustomRMIRegistry(host, 80)
+        //getRMIRegistry(host, 1099)
                 .thenCompose(SampleRMIClient::lookup)
                 .thenCompose(SampleRMIClient::call)
                 .exceptionally(e -> {

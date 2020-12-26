@@ -1,8 +1,8 @@
 package org.bsc.rmi.transport.proxy.http.client;
 
-import org.bsc.rmi.transport.proxy.http.client.HttpSendSocket;
-
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The HttpSendInputStream class is used by the HttpSendSocket class as

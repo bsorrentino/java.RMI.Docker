@@ -17,15 +17,10 @@ import java.rmi.RemoteException;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.stream.Collectors;
-
+import java.util.logging.Level;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.synchronizedMap;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -119,13 +114,13 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
          * Return the string form of the command to be recognized in the
          * query string.
          */
-        public String getName();
+        String getName();
 
         /**
          * Execute the command with the given string as parameter.
          */
-        public void execute(HttpServletRequest req, HttpServletResponse res,
-                            String param)
+        void execute(HttpServletRequest req, HttpServletResponse res,
+                     String param)
                 throws ServletClientException, ServletServerException, IOException;
     }
 
@@ -193,8 +188,10 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 java.rmi.registry.LocateRegistry.createRegistry(1099);
             } catch (java.rmi.server.ExportException ee) {
                 // registry already exists, we'll just use it.
+                log.warning("registry already exists, we'll just use it.");
             } catch (RemoteException re) {
-                log.throwing(getClass().getName(), "init", re);
+                log.log(Level.SEVERE, "init", re);
+                //log.throwing(getClass().getName(), "init", re);
             }
 
             /**
@@ -207,7 +204,8 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             log.info("RMI Servlet Handler loaded sucessfully.");
 
         } catch (Exception e) {
-            log.throwing(getClass().getName(), "init", e);
+            log.log(Level.SEVERE, "init", e);
+            //log.throwing(getClass().getName(), "init", e);
         }
     }
 
@@ -222,8 +220,8 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 log.info("Remote object created successfully.");
             }
         } catch (Exception e) {
-            log.severe("Exception received while intalling object:");
-            log.throwing(getClass().getName(), "run", e);
+            log.log(Level.SEVERE, "Exception received while intalling object:", e);
+            //log.throwing(getClass().getName(), "run", e);
         }
     }
 
@@ -315,13 +313,14 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
         try {
 
             // Command and parameter for this POST request.
-            String queryString = req.getQueryString();
-            String command, param;
+            final String queryString = ofNullable(req.getQueryString()).orElse("");
+
+            String command = queryString;
+            String param = "";
+
             int delim = queryString.indexOf("=");
-            if (delim == -1) {
-                command = queryString;
-                param = "";
-            } else {
+
+            if (delim > -1) {
                 command = queryString.substring(0, delim);
                 param = queryString.substring(delim + 1);
             }
@@ -338,16 +337,19 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                     handler.execute(req, res, param);
                 } catch (ServletClientException e) {
                     returnClientError(res, "client error: %s", e.getMessage());
-                    log.throwing(getClass().getName(), "doPost", e);
+                    log.log(Level.SEVERE, "client error", e);
+                    //log.throwing(getClass().getName(), "doPost", e);
                 } catch (ServletServerException e) {
                     returnServerError(res, "internal server error: %s", e.getMessage());
-                    log.throwing(getClass().getName(), "doPost", e);
+                    log.log(Level.SEVERE, "internal Server Error", e);
+                    //log.throwing(getClass().getName(), "doPost", e);
                 }
             else
                 returnClientError(res, "invalid command: %s", command);
         } catch (Exception e) {
             returnServerError(res, "internal error: %s", e.getMessage());
-            log.throwing(getClass().getName(), "doPost", e);
+            log.log(Level.SEVERE, "internal Error", e);
+            //log.throwing(getClass().getName(), "doPost", e);
         }
     }
 
@@ -376,7 +378,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
     public void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         returnClientError(res,
-                "PUT Operation not supported: %",
+                "PUT Operation not supported: %s",
                 "Can only forward POST requests.");
     }
 
@@ -401,7 +403,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      */
     private static void returnClientError(HttpServletResponse res, String messageFormat, String ...msg ) throws IOException {
 
-        final String message = format( messageFormat, msg );
+        final String message = format( messageFormat, (Object[])msg );
 
         res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "<HTML><HEAD>" +
@@ -412,7 +414,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                         message +
                         "</BODY></HTML>");
 
-        log.severe(format( "%s Java RMI Client Error: %s", HttpServletResponse.SC_BAD_REQUEST, message));
+        log.severe(format( "%d Java RMI Client Error: %s", HttpServletResponse.SC_BAD_REQUEST, message));
     }
 
     /**
@@ -425,7 +427,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      */
     private static void returnServerError(HttpServletResponse res, String messageFormat, String ...msg) throws IOException {
 
-        final String message = format( messageFormat, msg );
+        final String message = format( messageFormat, (Object[])msg );
 
         res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "<HTML><HEAD>" +
@@ -435,7 +437,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                         "<H1>Java RMI Server Error</H1>" +
                         message + "</BODY></HTML>");
 
-        log.severe( format( "% Java RMI Server Error: %s", HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message));
+        log.severe( format( "%d Java RMI Server Error: %s", HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message));
     }
 
     /**
@@ -445,15 +447,12 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      */
     protected synchronized void setConfigParameters(ServletConfig config) {
         try {
-            initialServerCodebase = config.
-                    getInitParameter("rmiservlethandler.initialServerCodebase");
-            initialServerClass = config.
-                    getInitParameter("rmiservlethandler.initialServerClass");
-            initialServerBindName = config.
-                    getInitParameter("rmiservlethandler.initialServerBindName");
+            initialServerCodebase   = config.getInitParameter("rmiservlethandler.initialServerCodebase");
+            initialServerClass      = config.getInitParameter("rmiservlethandler.initialServerClass");
+            initialServerBindName   = config.getInitParameter("rmiservlethandler.initialServerBindName");
         } catch (Exception e) {
-            log.severe("Could not access init parameter:");
-            log.throwing(getClass().getName(), "setConfigParameters", e);
+            log.log(Level.SEVERE, "Could not access init parameter:", e);
+            //log.throwing(getClass().getName(), "setConfigParameters", e);
         }
     }
 
