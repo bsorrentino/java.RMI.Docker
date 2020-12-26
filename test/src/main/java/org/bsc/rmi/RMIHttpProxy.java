@@ -33,9 +33,11 @@ public class RMIHttpProxy {
 
         servletHandler.addServletWithMapping(RMIServletHandler.class, "/*");
 
-        server.join();
+        server.start();
 
         log.info("jetty started!");
+
+        server.join();
 
     }
 

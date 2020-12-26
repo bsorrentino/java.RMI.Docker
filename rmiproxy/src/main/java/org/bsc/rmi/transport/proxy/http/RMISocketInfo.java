@@ -1,4 +1,4 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http;
 
 /**
  * RMISocketInfo is an interface that extensions of the java.net.Socket
@@ -11,5 +11,5 @@ public interface RMISocketInfo {
      * RMI call.  If a socket does not implement this interface, then
      * it is assumed to be reusable.
      */
-    public boolean isReusable();
+    boolean isReusable();
 }

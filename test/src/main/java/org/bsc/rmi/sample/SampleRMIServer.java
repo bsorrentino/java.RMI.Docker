@@ -39,7 +39,6 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.java.Log;
-import sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
 
 import java.rmi.*;
 import java.rmi.registry.Registry;

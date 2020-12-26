@@ -1,9 +1,8 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.ServerSocket;
-import java.net.URL;
+import java.net.Socket;
 import java.rmi.server.RMISocketFactory;
 
 /**
@@ -18,14 +17,16 @@ public class RMIHttpToCGISocketFactory extends RMISocketFactory {
     public Socket createSocket(String host, int port)
         throws IOException
     {
-        return new HttpSendSocket(host, port,
-                                  new URL("http", host,
-                                          "/cgi-bin/java-rmi.cgi" +
-                                          "?forward=" + port));
+//        return new HttpSendSocket(host, port,
+//                                  new URL("http", host,
+//                                          "/cgi-bin/java-rmi.cgi" +
+//                                          "?forward=" + port));
+        throw new Error( "not implemented!");
     }
 
     public ServerSocket createServerSocket(int port) throws IOException
     {
-        return new HttpAwareServerSocket(port);
+        //return new HttpAwareServerSocket(port);
+        throw new Error( "not implemented!");
     }
 }

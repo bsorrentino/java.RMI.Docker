@@ -10,7 +10,7 @@ import java.rmi.server.RMIServerSocketFactory;
 import com.javacodegeeks.core.rmi.rminterface.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
+import org.bsc.rmi.transport.proxy.http.RMIHttpToCGISocketFactory;
 
 @Slf4j
 public class RemoteServer {

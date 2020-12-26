@@ -1,20 +1,32 @@
 package org.bsc.rmi.servlet;
 
-import java.io.*;
-import java.net.*;
-import java.rmi.Naming;
-import java.rmi.server.RMIClassLoader;
-import java.rmi.RemoteException;
-import java.rmi.RMISecurityManager;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.rmi.registry.LocateRegistry;
+import lombok.extern.java.Log;
 
-import javax.servlet.http.*;
-import javax.servlet.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.rmi.server.RMIClassLoader;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.stream.Collectors;
+
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.synchronizedMap;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * The default RMI socket factory contains several "fallback"
@@ -72,6 +84,7 @@ import static java.lang.String.format;
  * http://jserv.javasoft.com/products/java-server/documentation/
  * webserver1.0.2/apidoc/Package-javax.servlet.http.html
  */
+@Log
 public class RMIServletHandler extends HttpServlet implements Runnable {
 
     /* Variables to hold optional configuration properties. */
@@ -116,25 +129,21 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 throws ServletClientException, ServletServerException, IOException;
     }
 
-    /**
-     * List of handlers for supported commands. A new command will be
-     * created for every service request
-     */
-    private static RMICommandHandler commands[] =
-            new RMICommandHandler[]{
+    /* construct table mapping command strings to handlers */
+    private static final java.util.Map<String,RMICommandHandler> commandLookup;
+
+    static {
+        /**
+         * List of handlers for supported commands. A new command will be
+         * created for every service request
+         */
+        final RMICommandHandler commands[] = {
                     new ServletForwardCommand(),
                     new ServletGethostnameCommand(),
                     new ServletPingCommand(),
                     new ServletTryHostnameCommand()
-            };
-
-    /* construct table mapping command strings to handlers */
-    private static Hashtable commandLookup;
-
-    static {
-        commandLookup = new Hashtable();
-        for (int i = 0; i < commands.length; ++i)
-            commandLookup.put(commands[i].getName(), commands[i]);
+                };
+        commandLookup = Arrays.stream( commands ).collect(toMap(cmd -> cmd.getName(), cmd -> cmd  ));
     }
 
     /**
@@ -165,7 +174,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             if (!verifyConfigParameters()) {
                 // dont export any objects.
 
-                System.err.println("Some optional parameters not set, remote object not exported; ServletHandler is runnning.");
+                log.severe("Some optional parameters not set, remote object not exported; ServletHandler is runnning.");
 
                 return;
             }
@@ -185,8 +194,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             } catch (java.rmi.server.ExportException ee) {
                 // registry already exists, we'll just use it.
             } catch (RemoteException re) {
-                System.err.println(re.getMessage());
-                re.printStackTrace();
+                log.throwing(getClass().getName(), "init", re);
             }
 
             /**
@@ -196,12 +204,10 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
              */
             (new Thread(this)).start();
 
-            System.out.println("RMI Servlet Handler loaded sucessfully.");
+            log.info("RMI Servlet Handler loaded sucessfully.");
 
         } catch (Exception e) {
-            System.err.println("Exception thrown in RMI ServletHandler: " +
-                    e.getMessage());
-            e.printStackTrace();
+            log.throwing(getClass().getName(), "init", e);
         }
     }
 
@@ -213,12 +219,11 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             final UnicastRemoteObject server = createRemoteObjectUsingDownloadedClass();
             if (server != null) {
                 Naming.rebind(initialServerBindName, server);
-                System.err.println("Remote object created successfully.");
+                log.info("Remote object created successfully.");
             }
         } catch (Exception e) {
-            System.err.println("Exception received while intalling object:");
-            System.err.println(e.getMessage());
-            e.printStackTrace();
+            log.severe("Exception received while intalling object:");
+            log.throwing(getClass().getName(), "run", e);
         }
     }
 
@@ -232,7 +237,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      */
     UnicastRemoteObject createRemoteObjectUsingDownloadedClass() throws Exception {
         UnicastRemoteObject server = null;
-        Class serverClass = null;
+        Class<?> serverClass = null;
 
         int MAX_RETRY = 5;
         int retry = 0;
@@ -240,18 +245,15 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
 
         while ((retry < MAX_RETRY) && (serverClass == null)) {
             try {
-                System.err.println("Attempting to load remote class...");
+                log.info("Attempting to load remote class...");
                 serverClass = RMIClassLoader.loadClass(new URL(initialServerCodebase), initialServerClass);
 
                 // Before we instantiate the obj. make sure it
                 // is a UnicastRemoteObject.
                 if (!Class.forName("java.rmi.server.UnicastRemoteObject").isAssignableFrom(serverClass)) {
-                    System.err.println(
-                            "This example requires an " +
-                                    " instance of UnicastRemoteObject," +
-                                    " remote object not exported.");
+                    log.info("This example requires an instance of UnicastRemoteObject, remote object not exported.");
                 } else {
-                    System.out.println("Server class loaded successfully...");
+                    log.info("Server class loaded successfully...");
                     server = ((UnicastRemoteObject) serverClass.newInstance());
                 }
 
@@ -265,15 +267,13 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                  * few more times...
                  */
                 if (retry >= MAX_RETRY) {
-                    System.err.println("Failed to load remote server " +
-                            " class. Remote object not " +
-                            " exported... ");
+                    log.info("Failed to load remote server class. Remote object not exported... ");
                 } else {
-                    System.err.println("Could not load remote class, " +
-                            "trying again...");
+                    log.warning("Could not load remote class, trying again...");
                     try {
                         Thread.sleep(sleep);
                     } catch (InterruptedException ie) {
+                        log.warning( "interrupt exception ignored!");
                     }
                     continue;
                 }
@@ -326,33 +326,28 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 param = queryString.substring(delim + 1);
             }
 
-            System.out.println("command: " + command);
-            System.out.println("param: " + param);
+            log.info( format("command: %s", command));
+            log.info( format("param: %s", param));
 
             // lookup command to execute on the client's behalf
-            RMICommandHandler handler =
-                    (RMICommandHandler) commandLookup.get(command);
+            final RMICommandHandler handler = commandLookup.get(command);
 
             // execute the command
             if (handler != null)
                 try {
                     handler.execute(req, res, param);
                 } catch (ServletClientException e) {
-                    returnClientError(res, "client error: " +
-                            e.getMessage());
-                    e.printStackTrace();
+                    returnClientError(res, "client error: %s", e.getMessage());
+                    log.throwing(getClass().getName(), "doPost", e);
                 } catch (ServletServerException e) {
-                    returnServerError(res, "internal server error: " +
-                            e.getMessage());
-                    e.printStackTrace();
+                    returnServerError(res, "internal server error: %s", e.getMessage());
+                    log.throwing(getClass().getName(), "doPost", e);
                 }
             else
-                returnClientError(res, "invalid command: " +
-                        command);
+                returnClientError(res, "invalid command: %s", command);
         } catch (Exception e) {
-            returnServerError(res, "internal error: " +
-                    e.getMessage());
-            e.printStackTrace();
+            returnServerError(res, "internal error: %s", e.getMessage());
+            log.throwing(getClass().getName(), "doPost", e);
         }
     }
 
@@ -364,23 +359,31 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      * @param req http Servlet request, contains incoming command and
      *            arguments
      * @param res http Servlet response
-     * @throws ServletException and IOException when invoking
-     *                          methods of <code>req<code> or <code>res<code>.
      */
-    public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         returnClientError(res,
-                "GET Operation not supported: " +
-                        "Can only forward POST requests.");
+                "GET Operation not supported: %s",
+                "Can only forward POST requests.");
     }
 
-    public void doPut(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    /**
+     *
+     * @param req
+     * @param res
+     * @throws IOException
+     */
+    public void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         returnClientError(res,
-                "PUT Operation not supported: " +
-                        "Can only forward POST requests.");
+                "PUT Operation not supported: %",
+                "Can only forward POST requests.");
     }
 
+    /**
+     *
+     * @return
+     */
     public String getServletInfo() {
         return "RMI Call Forwarding Servlet Servlet.<br>\n";
     }
@@ -389,12 +392,16 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      * Return an HTML error message indicating there was error in
      * the client's request.
      *
-     * @param res     Servlet response object through which <code>message</code>
-     *                will be written to the client which invoked one of
-     *                this servlet's methods.
-     * @param message Error message to be written to client.
+     * @param res   Servlet response object through which <code>message</code>
+     *              will be written to the client which invoked one of
+     *              this servlet's methods.
+     * @param messageFormat
+     * @param msg
+     * @throws IOException
      */
-    private static void returnClientError(HttpServletResponse res, String message) throws IOException {
+    private static void returnClientError(HttpServletResponse res, String messageFormat, String ...msg ) throws IOException {
+
+        final String message = format( messageFormat, msg );
 
         res.sendError(HttpServletResponse.SC_BAD_REQUEST,
                 "<HTML><HEAD>" +
@@ -405,9 +412,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                         message +
                         "</BODY></HTML>");
 
-        System.err.println(HttpServletResponse.SC_BAD_REQUEST +
-                "Java RMI Client Error" +
-                message);
+        log.severe(format( "%s Java RMI Client Error: %s", HttpServletResponse.SC_BAD_REQUEST, message));
     }
 
     /**
@@ -416,9 +421,11 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      *
      * @param res     Servlet response object through which <code>message</code>
      *                will be written to the servlet client.
-     * @param message Error message to be written to servlet client.
+     * @param messageFormat Error message to be written to servlet client.
      */
-    private static void returnServerError(HttpServletResponse res, String message) throws IOException {
+    private static void returnServerError(HttpServletResponse res, String messageFormat, String ...msg) throws IOException {
+
+        final String message = format( messageFormat, msg );
 
         res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "<HTML><HEAD>" +
@@ -428,9 +435,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                         "<H1>Java RMI Server Error</H1>" +
                         message + "</BODY></HTML>");
 
-        System.err.println(HttpServletResponse.SC_INTERNAL_SERVER_ERROR +
-                "Java RMI Server Error: " +
-                message);
+        log.severe( format( "% Java RMI Server Error: %s", HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message));
     }
 
     /**
@@ -447,10 +452,8 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             initialServerBindName = config.
                     getInitParameter("rmiservlethandler.initialServerBindName");
         } catch (Exception e) {
-            System.err.println("");
-            System.err.println("Could not access init parameter:");
-            System.err.println(e.getMessage());
-            e.printStackTrace();
+            log.severe("Could not access init parameter:");
+            log.throwing(getClass().getName(), "setConfigParameters", e);
         }
     }
 
@@ -476,13 +479,11 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      */
     protected boolean verifyParameter(String parameterName, String parameter) {
         if ((parameter == null) || (parameter.equals(""))) {
-            System.err.println("optional parameter is invalid and " +
-                    "will not be used: \n    " +
-                    parameterName + " = " + parameter);
+            log.warning(format("optional parameter is invalid and will not be used: \n %s = %s",
+                        parameterName, parameter));
             return false;
         } else {
-            System.err.println(parameterName + " " +
-                    "valid: " + parameter);
+            log.info(format( "%s valid: %s" + parameterName, parameter));
         }
         return true;
     }
@@ -602,16 +603,14 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      * Class that has an execute method to return the host name of the
      * server as the response body.
      */
-    protected static class ServletGethostnameCommand
-            implements RMICommandHandler {
+    protected static class ServletGethostnameCommand implements RMICommandHandler {
 
         public String getName() {
             return "gethostname";
         }
 
-        public void execute(HttpServletRequest req, HttpServletResponse res,
-                            String param)
-                throws ServletClientException, ServletServerException, IOException {
+        public void execute(HttpServletRequest req, HttpServletResponse res, String param) throws IOException
+        {
 
             byte[] getHostStringBytes = req.getServerName().getBytes();
 
@@ -635,9 +634,8 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             return "ping";
         }
 
-        public void execute(HttpServletRequest req, HttpServletResponse res,
-                            String param)
-                throws ServletClientException, ServletServerException, IOException {
+        public void execute(HttpServletRequest req, HttpServletResponse res, String param)
+        {
 
             res.setStatus(HttpServletResponse.SC_OK);
             res.setContentType("application/octet-stream");
@@ -650,19 +648,16 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      * message describing which host name is available to local Java
      * VMs.
      */
-    protected static class ServletTryHostnameCommand
-            implements RMICommandHandler {
+    protected static class ServletTryHostnameCommand implements RMICommandHandler {
 
         public String getName() {
             return "hostname";
         }
 
+        public void execute(HttpServletRequest req, HttpServletResponse res, String param) throws IOException
+        {
 
-        public void execute(HttpServletRequest req, HttpServletResponse res,
-                            String param)
-                throws ServletClientException, ServletServerException, IOException {
-
-            PrintWriter pw = res.getWriter();
+            final PrintWriter pw = res.getWriter();
 
             pw.println("");
             pw.println("<HTML>" +

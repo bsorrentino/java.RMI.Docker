@@ -1,4 +1,4 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.socket;
 
 import java.io.*;
 import java.net.*;
@@ -6,6 +6,8 @@ import java.security.*;
 import java.util.*;
 import java.rmi.server.LogStream;
 import java.rmi.server.RMISocketFactory;
+
+import org.bsc.rmi.transport.proxy.http.RMIHttpToCGISocketFactory;
 import sun.rmi.runtime.Log;
 import sun.rmi.runtime.NewThreadAction;
 import sun.security.action.GetBooleanAction;
@@ -98,7 +100,7 @@ public class RMIMasterSocketFactory extends RMISocketFactory {
         }
 
         if (setFactories) {
-            altFactoryList.addElement(new RMIHttpToPortSocketFactory());
+            //altFactoryList.addElement(new RMIHttpToPortSocketFactory());
             altFactoryList.addElement(new RMIHttpToCGISocketFactory());
         }
     }

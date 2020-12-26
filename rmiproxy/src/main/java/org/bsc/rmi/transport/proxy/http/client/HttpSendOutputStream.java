@@ -1,4 +1,6 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http.client;
+
+import org.bsc.rmi.transport.proxy.http.client.HttpSendSocket;
 
 import java.io.*;
 

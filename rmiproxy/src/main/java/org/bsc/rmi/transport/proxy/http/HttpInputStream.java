@@ -1,14 +1,19 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http;
 
 import java.io.*;
+import java.util.logging.Level;
 
-import sun.rmi.runtime.Log;
+import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.socket.RMIMasterSocketFactory;
+
+import static java.lang.String.format;
 
 /**
  * The HttpInputStream class assists the HttpSendSocket and HttpReceiveSocket
  * classes by filtering out the header for the message as well as any
  * data after its proper content length.
  */
+@Log
 class HttpInputStream extends FilterInputStream {
 
     /** bytes remaining to be read from proper content of message */
@@ -37,9 +42,8 @@ class HttpInputStream extends FilterInputStream {
         do {
             line = dis.readLine();
 
-            if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.VERBOSE)) {
-                RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-                    "received header line: \"" + line + "\"");
+            if( log.isLoggable(Level.FINE)) {
+                log.fine(format("received header line: \"%s\"", line ));
             }
 
             if (line == null)
@@ -71,9 +75,8 @@ class HttpInputStream extends FilterInputStream {
         }
         bytesLeftAtMark = bytesLeft;
 
-        if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.VERBOSE)) {
-            RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-                "content length: " + bytesLeft);
+        if( log.isLoggable(Level.FINE)) {
+            log.fine(format("content length: %d", bytesLeft));
         }
     }
 
@@ -103,8 +106,8 @@ class HttpInputStream extends FilterInputStream {
             if (data != -1)
                 -- bytesLeft;
 
-            if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.VERBOSE)) {
-                RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
+            if( log.isLoggable(Level.FINE)) {
+                log.fine(
                    "received byte: '" +
                     ((data & 0x7F) < ' ' ? " " : String.valueOf((char) data)) +
                     "' " + data);
@@ -113,8 +116,7 @@ class HttpInputStream extends FilterInputStream {
             return data;
         }
         else {
-            RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-                                                "read past content length");
+            log.fine("read past content length");
 
             return -1;
         }
@@ -123,8 +125,7 @@ class HttpInputStream extends FilterInputStream {
     public int read(byte b[], int off, int len) throws IOException
     {
         if (bytesLeft == 0 && len > 0) {
-            RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-                                                "read past content length");
+            log.fine("read past content length");
 
             return -1;
         }
@@ -133,9 +134,8 @@ class HttpInputStream extends FilterInputStream {
         int bytesRead = in.read(b, off, len);
         bytesLeft -= bytesRead;
 
-        if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.VERBOSE)) {
-            RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-                "read " + bytesRead + " bytes, " + bytesLeft + " remaining");
+        if( log.isLoggable(Level.FINE)) {
+            log.fine("read " + bytesRead + " bytes, " + bytesLeft + " remaining");
         }
 
         return bytesRead;

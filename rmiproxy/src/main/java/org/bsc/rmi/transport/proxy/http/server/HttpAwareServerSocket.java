@@ -1,10 +1,17 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http.server;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import sun.rmi.runtime.Log;
+import java.util.logging.Level;
+
+import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.http.HttpReceiveSocket;
+import org.bsc.rmi.transport.proxy.socket.RMIMasterSocketFactory;
+import org.bsc.rmi.transport.proxy.http.WrappedSocket;
+
+import static java.lang.String.format;
 
 /**
  * The HttpAwareServerSocket class extends the java.net.ServerSocket
@@ -14,6 +21,7 @@ import sun.rmi.runtime.Log;
  * This means that the accept method blocks until four bytes have been
  * read from the new socket's input stream.
  */
+@Log
 class HttpAwareServerSocket extends ServerSocket {
 
     /**
@@ -57,8 +65,7 @@ class HttpAwareServerSocket extends ServerSocket {
         BufferedInputStream in =
             new BufferedInputStream(socket.getInputStream());
 
-        RMIMasterSocketFactory.proxyLog.log(Log.BRIEF,
-            "socket accepted (checking for POST)");
+        log.info("socket accepted (checking for POST)");
 
         in.mark(4);
         boolean isHttp = (in.read() == 'P') &&
@@ -67,10 +74,9 @@ class HttpAwareServerSocket extends ServerSocket {
                          (in.read() == 'T');
         in.reset();
 
-        if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.BRIEF)) {
-            RMIMasterSocketFactory.proxyLog.log(Log.BRIEF,
-                (isHttp ? "POST found, HTTP socket returned" :
-                          "POST not found, direct socket returned"));
+        if( log.isLoggable(Level.INFO) ) {
+                log.info(isHttp ? "POST found, HTTP socket returned" :
+                          "POST not found, direct socket returned");
         }
 
         if (isHttp)
@@ -85,6 +91,6 @@ class HttpAwareServerSocket extends ServerSocket {
      */
     public String toString()
     {
-        return "HttpAware" + super.toString();
+        return format( "HttpAware %s", super.toString()) ;
     }
 }

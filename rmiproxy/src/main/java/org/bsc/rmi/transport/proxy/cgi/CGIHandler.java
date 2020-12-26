@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.cgi;
 
 import java.io.*;
 import java.net.*;

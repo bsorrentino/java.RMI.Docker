@@ -40,12 +40,9 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import sun.rmi.transport.proxy.RMIHttpToCGISocketFactory;
 
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
-import java.rmi.server.RMIServerSocketFactory;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;

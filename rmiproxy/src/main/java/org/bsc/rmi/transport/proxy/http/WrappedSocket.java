@@ -1,4 +1,4 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -14,7 +14,7 @@ import java.security.PrivilegedAction;
  * constructor for specifying alternate input or output streams to be
  * returned than those of the underlying Socket.
  */
-class WrappedSocket extends Socket {
+public class WrappedSocket extends Socket {
 
     /** the underlying concrete socket */
     protected Socket socket;

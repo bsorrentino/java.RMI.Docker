@@ -1,9 +1,13 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http.client;
+
+import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.http.RMISocketInfo;
 
 import java.io.*;
 import java.net.*;
+import java.util.logging.Level;
 
-import sun.rmi.runtime.Log;
+import static java.lang.String.format;
 
 /**
  * The HttpSendSocket class extends the java.net.Socket class
@@ -23,6 +27,7 @@ import sun.rmi.runtime.Log;
  * the response.  A subsequent attempt to write to this socket will
  * throw an IOException.
  */
+@Log
 class HttpSendSocket extends Socket implements RMISocketInfo {
 
     /** the host to connect to */
@@ -67,10 +72,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
     {
         super((SocketImpl)null);        // no underlying SocketImpl for this object
 
-        if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.VERBOSE)) {
-            RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-                "host = " + host + ", port = " + port + ", url = " + url);
-        }
+        log.info( format("host=%s, port=%d, url=%s", host, port,url ));
 
         this.host = host;
         this.port = port;
@@ -136,8 +138,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
      */
     public synchronized InputStream readNotify() throws IOException
     {
-        RMIMasterSocketFactory.proxyLog.log(Log.VERBOSE,
-            "sending request and activating input stream");
+        log.info( "sending request and activating input stream");
 
         outNotifier.deactivate();
         out.close();
@@ -146,8 +147,8 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
         try {
             in = conn.getInputStream();
         } catch (IOException e) {
-            RMIMasterSocketFactory.proxyLog.log(Log.BRIEF,
-                "failed to get input stream, exception: ", e);
+            log.severe("failed to get input stream, exception: ");
+            log.throwing( getClass().getName(), "readNotify", e);
 
             throw new IOException("HTTP request failed");
         }
@@ -166,16 +167,13 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
         if (contentType == null ||
             !conn.getContentType().equals("application/octet-stream"))
         {
-            if (RMIMasterSocketFactory.proxyLog.isLoggable(Log.BRIEF)) {
+            if( log.isLoggable(Level.INFO) ) {
                 String message;
                 if (contentType == null) {
-                    message = "missing content type in response" +
-                        lineSeparator;
+                    message = "missing content type in response" + lineSeparator;
                 } else {
-                    message = "invalid content type in response: " +
-                        contentType + lineSeparator;
+                    message = "invalid content type in response: " + contentType + lineSeparator;
                 }
-
                 message += "HttpSendSocket.readNotify: response body: ";
                 try {
                     BufferedReader din = new BufferedReader(new InputStreamReader(in));
@@ -183,8 +181,10 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
                     while ((line = din.readLine()) != null)
                         message += line + lineSeparator;
                 } catch (IOException e) {
+                    log.warning( "IOException ignored!");
                 }
-                RMIMasterSocketFactory.proxyLog.log(Log.BRIEF, message);
+
+                log.info( message);
             }
 
             throw new IOException("HTTP request failed");

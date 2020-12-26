@@ -1,4 +1,4 @@
-package sun.rmi.transport.proxy;
+package org.bsc.rmi.transport.proxy.http;
 
 import java.io.*;
 
