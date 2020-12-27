@@ -1,6 +1,9 @@
-package org.bsc.rmi.transport.proxy.http.server;
+package org.bsc.rmi.proxy.http.server;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * The HttpOutputStream class assists the HttpSendSocket and HttpReceiveSocket

@@ -1,9 +1,7 @@
 package org.bsc.rmi.proxy.http.client;
 
 import lombok.extern.java.Log;
-import org.bsc.rmi.transport.proxy.http.RMISocketInfo;
-import org.bsc.rmi.transport.proxy.http.client.HttpSendInputStream;
-import org.bsc.rmi.transport.proxy.http.client.HttpSendOutputStream;
+import org.bsc.rmi.proxy.http.RMISocketInfo;
 
 import java.io.*;
 import java.net.*;
@@ -55,7 +53,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
     protected final HttpSendInputStream inNotifier;
 
     /** the notifying output stream returned to users */
-    protected final org.bsc.rmi.transport.proxy.http.client.HttpSendOutputStream outNotifier;
+    protected final HttpSendOutputStream outNotifier;
 
     /**
      * Line separator string.  This is the value of the line.separator
@@ -82,7 +80,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
         this.url = url;
 
         inNotifier = new HttpSendInputStream(null, this);
-        outNotifier = new org.bsc.rmi.transport.proxy.http.client.HttpSendOutputStream( null, this);
+        outNotifier = new HttpSendOutputStream( null, this);
     }
 
     /**

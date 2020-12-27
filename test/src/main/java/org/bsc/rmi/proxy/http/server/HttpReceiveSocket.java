@@ -1,13 +1,13 @@
 package org.bsc.rmi.proxy.http.server;
 
-import org.bsc.rmi.transport.proxy.http.RMISocketInfo;
-import org.bsc.rmi.transport.proxy.http.server.HttpInputStream;
-import org.bsc.rmi.transport.proxy.http.server.HttpOutputStream;
-import org.bsc.rmi.transport.proxy.http.server.WrappedSocket;
+import org.bsc.rmi.proxy.http.RMISocketInfo;
 
-import java.io.*;
-import java.net.Socket;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 
 /**
  * The HttpReceiveSocket class extends the WrappedSocket class

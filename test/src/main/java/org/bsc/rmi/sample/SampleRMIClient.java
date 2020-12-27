@@ -40,7 +40,7 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import org.bsc.rmi.transport.proxy.http.client.RMIHttpClientSocketFactory;
+import org.bsc.rmi.proxy.http.client.RMIHttpClientSocketFactory;
 
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;

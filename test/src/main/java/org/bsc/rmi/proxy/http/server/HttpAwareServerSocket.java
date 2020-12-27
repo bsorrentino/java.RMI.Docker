@@ -1,8 +1,6 @@
 package org.bsc.rmi.proxy.http.server;
 
 import lombok.extern.java.Log;
-import org.bsc.rmi.transport.proxy.http.server.HttpReceiveSocket;
-import org.bsc.rmi.transport.proxy.http.server.WrappedSocket;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

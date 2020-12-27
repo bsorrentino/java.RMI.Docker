@@ -39,7 +39,7 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.java.Log;
-import org.bsc.rmi.transport.proxy.http.server.RMIHttpServerSocketFactory;
+import org.bsc.rmi.proxy.http.server.RMIHttpServerSocketFactory;
 
 import java.rmi.*;
 import java.rmi.registry.Registry;
