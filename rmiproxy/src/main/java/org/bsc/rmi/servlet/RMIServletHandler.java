@@ -342,8 +342,7 @@ public class RMIServletHandler extends HttpServlet {
                 param = queryString.substring(delim + 1);
             }
 
-            log.info( format("command: %s", command));
-            log.info( format("param: %s", param));
+            log.info( format("command: %s param: %s", command, param ));
 
             // lookup command to execute on the client's behalf
             final RMICommandHandler handler = commandLookup.get(command);
@@ -485,24 +484,34 @@ public class RMIServletHandler extends HttpServlet {
         public void execute(HttpServletRequest req, HttpServletResponse res, String param) throws ServletClientException, ServletServerException, IOException
         {
 
+            // GUARD
             int port;
+
             try {
                 port = Integer.parseInt(param);
+
+                if (port <= 0 || port > 0xFFFF)
+                    throw new ServletClientException( format("invalid port: %d", port));
+
+                if (port < 1024)
+                    throw new ServletClientException( format("permission denied for port: %d", port));
+
             } catch (NumberFormatException e) {
                 throw new ServletClientException( format("invalid port number: %s",param));
             }
-            if (port <= 0 || port > 0xFFFF)
-                throw new ServletClientException( format("invalid port: %d", port));
-            if (port < 1024)
-                throw new ServletClientException( format("permission denied for port: %d", port));
+
 
             byte buffer[];
 
             // read client's request body
-            DataInputStream clientIn = new DataInputStream(req.getInputStream());
-            buffer = new byte[req.getContentLength()];
-            try {
+            try (
+                    final DataInputStream clientIn = new DataInputStream(req.getInputStream())
+                )
+            {
+                buffer = new byte[req.getContentLength()];
+
                 clientIn.readFully(buffer);
+
             } catch (EOFException e) {
                 throw new ServletClientException("unexpected EOF reading request body");
             } catch (IOException e) {
@@ -531,7 +540,7 @@ public class RMIServletHandler extends HttpServlet {
                                     .map( getHostByName )
                                     .orElseGet( getLocalHost), port );
                     final DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());
-                    final DataInputStream socketIn = new DataInputStream(socket.getInputStream());
+                    final DataInputStream socketIn = new DataInputStream(socket.getInputStream())
                 )
             {
                 socketOut.writeBytes("POST / HTTP/1.0\r\n");

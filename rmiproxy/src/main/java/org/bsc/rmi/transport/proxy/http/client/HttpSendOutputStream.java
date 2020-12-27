@@ -1,8 +1,12 @@
 package org.bsc.rmi.transport.proxy.http.client;
 
+import lombok.extern.java.Log;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static java.lang.String.format;
 
 /**
  * The HttpSendOutputStream class is used by the HttpSendSocket class as
@@ -10,6 +14,7 @@ import java.io.OutputStream;
  * notified of attempts to write to it.  This allows the HttpSendSocket
  * to know when it should construct a new message.
  */
+@Log
 class HttpSendOutputStream extends FilterOutputStream {
 
     /** the HttpSendSocket object that is providing this stream */
@@ -43,8 +48,12 @@ class HttpSendOutputStream extends FilterOutputStream {
      */
     public void write(int b) throws IOException
     {
+
         if (out == null)
             out = owner.writeNotify();
+
+        log.info( format("write [%d] [%c]", b, b) );
+
         out.write(b);
     }
 
@@ -56,10 +65,13 @@ class HttpSendOutputStream extends FilterOutputStream {
      */
     public void write(byte b[], int off, int len) throws IOException
     {
-        if (len == 0)
-            return;
+        if (len == 0) return;
+
         if (out == null)
             out = owner.writeNotify();
+
+        log.info( format("write( bytes, [%d] [%d]", off, len) );
+
         out.write(b, off, len);
     }
 

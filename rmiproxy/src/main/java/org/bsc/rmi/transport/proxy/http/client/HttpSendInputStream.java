@@ -1,8 +1,12 @@
 package org.bsc.rmi.transport.proxy.http.client;
 
+import lombok.extern.java.Log;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
+import static java.lang.String.format;
 
 /**
  * The HttpSendInputStream class is used by the HttpSendSocket class as
@@ -10,6 +14,7 @@ import java.io.InputStream;
  * notified of attempts to read from it.  This allows the HttpSendSocket
  * to know when it should push across its output message.
  */
+@Log
 class HttpSendInputStream extends FilterInputStream {
 
     /** the HttpSendSocket object that is providing this stream */
@@ -45,6 +50,8 @@ class HttpSendInputStream extends FilterInputStream {
     {
         if (in == null)
             in = owner.readNotify();
+        log.info( "read" );
+
         return in.read();
     }
 
@@ -60,6 +67,9 @@ class HttpSendInputStream extends FilterInputStream {
             return 0;
         if (in == null)
             in = owner.readNotify();
+
+        log.info( format( "read %d %d", off, len));
+
         return in.read(b, off, len);
     }
 

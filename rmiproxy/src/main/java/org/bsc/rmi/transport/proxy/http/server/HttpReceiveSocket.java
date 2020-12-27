@@ -1,4 +1,6 @@
-package org.bsc.rmi.transport.proxy.http;
+package org.bsc.rmi.transport.proxy.http.server;
+
+import org.bsc.rmi.transport.proxy.http.RMISocketInfo;
 
 import java.io.*;
 import java.net.Socket;

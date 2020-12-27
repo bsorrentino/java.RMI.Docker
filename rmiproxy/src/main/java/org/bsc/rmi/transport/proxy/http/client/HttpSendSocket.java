@@ -50,10 +50,10 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
     protected OutputStream out = null;
 
     /** the notifying input stream returned to users */
-    protected HttpSendInputStream inNotifier;
+    protected final HttpSendInputStream inNotifier;
 
     /** the notifying output stream returned to users */
-    protected HttpSendOutputStream outNotifier;
+    protected final HttpSendOutputStream outNotifier;
 
     /**
      * Line separator string.  This is the value of the line.separator
@@ -80,7 +80,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
         this.url = url;
 
         inNotifier = new HttpSendInputStream(null, this);
-        outNotifier = new HttpSendOutputStream(writeNotify(), this);
+        outNotifier = new HttpSendOutputStream( null, this);
     }
 
     /**
@@ -105,6 +105,25 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
         this(address.getHostName(), port);
     }
 
+    private void outClose() throws IOException {
+        outNotifier.deactivate();
+        if( out!=null ) {
+            out.close();
+            out = null;
+        }
+
+
+    }
+
+    private void inClose() throws IOException {
+        inNotifier.deactivate();
+        if( in != null ) {
+            in.close();
+            in = null;
+        }
+
+    }
+
     /**
      * Indicate that this socket is not reusable.
      */
@@ -119,19 +138,28 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
      */
     public synchronized OutputStream writeNotify() throws IOException
     {
+        log.info( "activating output stream " + out);
+
         if (conn != null) {
-            throw new IOException("attempt to write on HttpSendSocket after request has been sent");
+
+            if( out!=null ) {
+                return out;
+            }
+
+            //throw new IOException("attempt to write on HttpSendSocket after request has been sent");
+            log.warning("attempt to write on HttpSendSocket after request has been sent ");
+
+            outClose();
         }
+
+        inClose();
 
         conn = url.openConnection();
         conn.setDoOutput(true);
         conn.setUseCaches(false);
         conn.setRequestProperty("Content-type", "application/octet-stream");
 
-        inNotifier.deactivate();
-        in = null;
         out = conn.getOutputStream();
-
         return out;
     }
 
@@ -142,9 +170,7 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
     {
         log.info( "sending request and activating input stream");
 
-        outNotifier.deactivate();
-        out.close();
-        out = null;
+        outClose();
 
         try {
             in = conn.getInputStream();
@@ -304,8 +330,8 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
      */
     public synchronized void close() throws IOException
     {
-        if (out != null) // push out transmission if not done
-            out.close();
+        inClose();
+        outClose();
     }
 
     /**

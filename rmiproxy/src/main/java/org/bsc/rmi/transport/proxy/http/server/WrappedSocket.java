@@ -1,4 +1,4 @@
-package org.bsc.rmi.transport.proxy.http;
+package org.bsc.rmi.transport.proxy.http.server;
 
 import java.io.*;
 import java.net.InetAddress;
