@@ -19,6 +19,6 @@ public class RMIHttpClientSocketFactory implements RMIClientSocketFactory {
     public Socket createSocket(String host, int port) throws IOException {
         log.info( format("%s.createSocket( %s, %d)", getClass().getSimpleName(), host, port) );
 
-        return new HttpSendSocket(host, port, new URL("http", host, port, "/"));
+        return new HttpSendSocket(host, port, new URL("http", host, port, "/rmi?forward=1099"));
     }
 }

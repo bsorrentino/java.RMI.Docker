@@ -1,10 +1,9 @@
 package org.bsc.rmi.transport.proxy.http;
 
+import lombok.extern.java.Log;
+
 import java.io.*;
 import java.util.logging.Level;
-
-import lombok.extern.java.Log;
-import org.bsc.rmi.transport.proxy.socket.RMIMasterSocketFactory;
 
 import static java.lang.String.format;
 

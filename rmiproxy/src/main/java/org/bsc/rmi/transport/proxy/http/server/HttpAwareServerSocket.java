@@ -60,28 +60,28 @@ class HttpAwareServerSocket extends ServerSocket {
      */
     public Socket accept() throws IOException
     {
-        Socket socket = super.accept();
-        BufferedInputStream in =
+        final Socket socket = super.accept();
+
+        final BufferedInputStream in =
             new BufferedInputStream(socket.getInputStream());
 
         log.info("socket accepted (checking for POST)");
 
         in.mark(4);
+
         boolean isHttp = (in.read() == 'P') &&
                          (in.read() == 'O') &&
                          (in.read() == 'S') &&
                          (in.read() == 'T');
         in.reset();
 
-        if( log.isLoggable(Level.INFO) ) {
-                log.info(isHttp ? "POST found, HTTP socket returned" :
-                          "POST not found, direct socket returned");
-        }
+        log.info( format( "request is Http [%b]", isHttp ) );
 
-        if (isHttp)
-            return new HttpReceiveSocket(socket, in, null);
-        else
-            return new WrappedSocket(socket, in, null);
+        return isHttp ?
+            // POST found, HTTP socket returned
+            new HttpReceiveSocket(socket, in, null) :
+            //POST not found, direct socket returned
+            new WrappedSocket(socket, in, null);
     }
 
     /**

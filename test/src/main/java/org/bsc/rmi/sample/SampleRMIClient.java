@@ -45,6 +45,7 @@ import org.bsc.rmi.transport.proxy.http.client.RMIHttpClientSocketFactory;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 import static java.lang.String.format;
 
@@ -160,7 +161,7 @@ public class SampleRMIClient {
          *       samplermi.SampleRMIClient <servletHostname>
          */
 
-        System.setProperty("java.security.policy", "java.policy");
+        System.setProperty("java.security.policy", "/Users/softphone/WORKSPACES/GITHUB.me/java.RMI.Docker/test/java.policy");
 
         System.setSecurityManager(new SecurityManager());
 
@@ -169,7 +170,8 @@ public class SampleRMIClient {
                 .thenCompose(SampleRMIClient::lookup)
                 .thenCompose(SampleRMIClient::call)
                 .exceptionally(e -> {
-                    log.throwing(SampleRMIClient.class.getName(), "main", e);
+                    log.log(Level.SEVERE, "error", e);
+                    //log.throwing(SampleRMIClient.class.getName(), "main", e);
                     return null;
                 })
                 .join();

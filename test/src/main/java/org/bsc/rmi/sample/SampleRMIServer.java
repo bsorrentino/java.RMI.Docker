@@ -39,6 +39,7 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.http.server.RMIHttpServerSocketFactory;
 
 import java.rmi.*;
 import java.rmi.registry.Registry;
@@ -102,7 +103,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
 
     private static CompletableFuture<Registry> createCustomRMIRegistry( int port ) {
 
-        final RMIServerSocketFactory serverSocketFactory = null;
+        final RMIServerSocketFactory serverSocketFactory = new RMIHttpServerSocketFactory();
         final RMIClientSocketFactory clientSocketFactory = null;
 
         CompletableFuture<Registry> result = new CompletableFuture<>();
@@ -127,7 +128,8 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
 
         log.info( format( "java.security.policy=[%s]", System.getProperty("java.security.policy")));
 
-        createRMIRegistry( 1099 )
+        createCustomRMIRegistry(1099)
+        //createRMIRegistry( 1099 )
             .thenCompose( SampleRMIServer::bind )
             .exceptionally( ex -> {
                 log.throwing(SampleRMIServer.class.getName(), "main", ex);

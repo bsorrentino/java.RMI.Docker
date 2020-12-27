@@ -1,5 +1,6 @@
 package org.bsc.rmi.servlet;
 
+import lombok.Data;
 import lombok.extern.java.Log;
 
 import javax.servlet.ServletConfig;
@@ -17,9 +18,14 @@ import java.rmi.RemoteException;
 import java.rmi.server.RMIClassLoader;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
@@ -80,24 +86,40 @@ import static java.util.stream.Collectors.toMap;
  * webserver1.0.2/apidoc/Package-javax.servlet.http.html
  */
 @Log
-public class RMIServletHandler extends HttpServlet implements Runnable {
+public class RMIServletHandler extends HttpServlet {
 
-    /* Variables to hold optional configuration properties. */
+    public static final String PARAM_PREFIX  = "rmiservlethandler.";
+    public static final String INITIAL_SERVER_CODEBASE  = PARAM_PREFIX.concat("initialServerCodebase");
+    public static final String INITIAL_SERVER_CLASS     = PARAM_PREFIX.concat("initialServerClass");
+    public static final String INITIAL_SERVER_BIND_NAME = PARAM_PREFIX.concat("initialServerBindName)");
+    public static final String RMI_REMOTE_HOST          = PARAM_PREFIX.concat("remoteHost");
+
+    @Data
+    static class Parameters{
+        String initialServerCodebase;
+        String initialServerClass;
+        String initialServerBindName;
+        Optional<String> remoteHost = empty();
+
+        public static Parameters of(ServletConfig config) {
+            final Parameters result = new Parameters();
+            result.initialServerCodebase   = ofNullable(config.getInitParameter(INITIAL_SERVER_CODEBASE)).orElse("");
+            result.initialServerClass      = ofNullable(config.getInitParameter(INITIAL_SERVER_CLASS)).orElse("");
+            result.initialServerBindName   = ofNullable(config.getInitParameter(INITIAL_SERVER_BIND_NAME)).orElse("");
+            result.remoteHost = ofNullable(config.getInitParameter(RMI_REMOTE_HOST));
+            return result;
+        }
+    }
+
+    private Optional<Parameters> _optParameters = empty();
 
     /**
-     * codebase from which this servlet will load remote objects.
+     *
+     * @return
      */
-    protected static String initialServerCodebase = null;
-
-    /**
-     * name of RMI server class to be created in init method
-     */
-    protected static String initialServerClass = null;
-
-    /**
-     * name of RMI server class to be created in init method
-     */
-    protected static String initialServerBindName = null;
+    private Parameters getParameters() {
+        return _optParameters.orElseThrow( () -> new IllegalStateException("parameters are not initialized!"));
+    }
 
     /**
      * RMICommandHandler is the abstraction for an object that handles
@@ -125,21 +147,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
     }
 
     /* construct table mapping command strings to handlers */
-    private static final java.util.Map<String,RMICommandHandler> commandLookup;
-
-    static {
-        /**
-         * List of handlers for supported commands. A new command will be
-         * created for every service request
-         */
-        final RMICommandHandler commands[] = {
-                    new ServletForwardCommand(),
-                    new ServletGethostnameCommand(),
-                    new ServletPingCommand(),
-                    new ServletTryHostnameCommand()
-                };
-        commandLookup = Arrays.stream( commands ).collect(toMap(cmd -> cmd.getName(), cmd -> cmd  ));
-    }
+    private java.util.Map<String,RMICommandHandler> commandLookup = emptyMap();
 
     /**
      * Once loaded, Java Servlets continue to run until they are
@@ -163,16 +171,21 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
+        /**
+         * List of handlers for supported commands. A new command will be
+         * created for every service request
+         */
+        final RMICommandHandler commands[] = {
+                new ServletForwardCommand(),
+                new ServletGethostnameCommand(),
+                new ServletPingCommand(),
+                new ServletTryHostnameCommand()
+        };
+        commandLookup = Arrays.stream( commands ).collect(toMap(cmd -> cmd.getName(), cmd -> cmd  ));
+
         try {
-            setConfigParameters(config);
 
-            if (!verifyConfigParameters()) {
-                // dont export any objects.
-
-                log.severe("Some optional parameters not set, remote object not exported; ServletHandler is runnning.");
-
-                return;
-            }
+            this._optParameters = Optional.of( Parameters.of(config) );
 
             /* RMI requires that a local security manager be
              * responsible for the method invocations from remote
@@ -199,7 +212,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
              * do not interfere with other servlets.  Allow init
              * method to return more quickly.
              */
-            (new Thread(this)).start();
+            //new Thread(this::createRMISampleServer).start();
 
             log.info("RMI Servlet Handler loaded sucessfully.");
 
@@ -212,11 +225,12 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
     /**
      * Create the sample RMI server.
      */
-    public void run() {
+    public void createRMISampleServer() {
+
         try {
             final UnicastRemoteObject server = createRemoteObjectUsingDownloadedClass();
             if (server != null) {
-                Naming.rebind(initialServerBindName, server);
+                Naming.rebind( getParameters().getInitialServerBindName(), server);
                 log.info("Remote object created successfully.");
             }
         } catch (Exception e) {
@@ -233,7 +247,8 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      * case of this example, that location will be
      * <code>initialServerCodebase</code>
      */
-    UnicastRemoteObject createRemoteObjectUsingDownloadedClass() throws Exception {
+    private UnicastRemoteObject createRemoteObjectUsingDownloadedClass() throws Exception {
+
         UnicastRemoteObject server = null;
         Class<?> serverClass = null;
 
@@ -241,10 +256,12 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
         int retry = 0;
         int sleep = 2000;
 
+        URL codebaseUrl = new URL(getParameters().getInitialServerCodebase());
+
         while ((retry < MAX_RETRY) && (serverClass == null)) {
             try {
                 log.info("Attempting to load remote class...");
-                serverClass = RMIClassLoader.loadClass(new URL(initialServerCodebase), initialServerClass);
+                serverClass = RMIClassLoader.loadClass(codebaseUrl, getParameters().getInitialServerClass());
 
                 // Before we instantiate the obj. make sure it
                 // is a UnicastRemoteObject.
@@ -440,53 +457,6 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
         log.severe( format( "%d Java RMI Server Error: %s", HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message));
     }
 
-    /**
-     * Retrieve parameters from servlet configuration object.
-     *
-     * @param config Standard configuration object for an HTTP servlet.
-     */
-    protected synchronized void setConfigParameters(ServletConfig config) {
-        try {
-            initialServerCodebase   = config.getInitParameter("rmiservlethandler.initialServerCodebase");
-            initialServerClass      = config.getInitParameter("rmiservlethandler.initialServerClass");
-            initialServerBindName   = config.getInitParameter("rmiservlethandler.initialServerBindName");
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "Could not access init parameter:", e);
-            //log.throwing(getClass().getName(), "setConfigParameters", e);
-        }
-    }
-
-    /**
-     * Ensure that servlet configuration parameters are valid.
-     *
-     * @return <code>true</code> if all relevant configuration parameters
-     * are valid (i.e. not "") <code>false</code> otherwise.
-     */
-    protected synchronized boolean verifyConfigParameters() {
-        return ((verifyParameter("rmiservlethandler.initialServerClass ",
-                initialServerClass)) &&
-                (verifyParameter("rmiservlethandler.initialServerBindName ",
-                        initialServerBindName)) &&
-                (verifyParameter("rmiservlethandler.initialServerCodebase",
-                        initialServerCodebase)));
-    }
-
-    /**
-     * Verify that a single parameter is valid.
-     *
-     * @return <code>true</code> if the parameter is valid.
-     */
-    protected boolean verifyParameter(String parameterName, String parameter) {
-        if ((parameter == null) || (parameter.equals(""))) {
-            log.warning(format("optional parameter is invalid and will not be used: \n %s = %s",
-                        parameterName, parameter));
-            return false;
-        } else {
-            log.info(format( "%s valid: %s" + parameterName, parameter));
-        }
-        return true;
-    }
-
     /*
      * The ServletHandler class is the only object that needs to access the
      * CommandHandler subclasses, so we write the commands internal to the
@@ -497,7 +467,7 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
      * Class that has an execute command to forward request body to
      * local port on the server and send server reponse back to client.
      */
-    protected static class ServletForwardCommand implements RMICommandHandler {
+    protected class ServletForwardCommand implements RMICommandHandler {
 
         public String getName() {
             return "forward";
@@ -512,7 +482,8 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
          * @param res   The servlet response.
          * @param param Port to which data will be sent.
          */
-        public void execute(HttpServletRequest req, HttpServletResponse res, String param) throws ServletClientException, ServletServerException, IOException {
+        public void execute(HttpServletRequest req, HttpServletResponse res, String param) throws ServletClientException, ServletServerException, IOException
+        {
 
             int port;
             try {
@@ -538,11 +509,27 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
                 throw new ServletClientException("error reading request body");
             }
 
-            final String rmihost = System.getenv("RMI_REMOTE_HOST");
+            final Function<String,InetAddress> getHostByName = (rmihost) -> {
+                try {
+                    return InetAddress.getByName(rmihost);
+                } catch (UnknownHostException e) {
+                    throw new Error(e);
+                }
+            };
+            final Supplier<InetAddress> getLocalHost = () -> {
+                try {
+                    return InetAddress.getLocalHost();
+                } catch (UnknownHostException e) {
+                    throw new Error(e);
+                }
+            };
 
             // send to local server in HTTP
             try (
-                    final Socket socket = new Socket( (rmihost!=null) ? InetAddress.getByName(rmihost) : InetAddress.getLocalHost(), port);
+                    final Socket socket = new Socket(
+                            getParameters().getRemoteHost()
+                                    .map( getHostByName )
+                                    .orElseGet( getLocalHost), port );
                     final DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());
                     final DataInputStream socketIn = new DataInputStream(socket.getInputStream());
                 )
@@ -592,8 +579,6 @@ public class RMIServletHandler extends HttpServlet implements Runnable {
             } catch (IOException e) {
                 throw new ServletServerException( format("error reading/writing to server: [%s]", e.getMessage()));
             }
-
-
 
         }
     }

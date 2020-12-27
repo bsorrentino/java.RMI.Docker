@@ -149,10 +149,10 @@ class HttpSendSocket extends Socket implements RMISocketInfo {
         try {
             in = conn.getInputStream();
         } catch (IOException e) {
-            log.severe("failed to get input stream, exception: ");
-            log.throwing( getClass().getName(), "readNotify", e);
+            log.log( Level.SEVERE, "failed to get input stream, exception: ", e);
+            //log.throwing( getClass().getName(), "readNotify", e);
 
-            throw new IOException("HTTP request failed");
+            throw e;
         }
 
         /*

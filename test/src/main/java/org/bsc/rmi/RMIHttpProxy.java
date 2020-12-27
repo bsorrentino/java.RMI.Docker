@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 @Log
@@ -16,6 +17,8 @@ public class RMIHttpProxy {
      * @throws Exception
      */
     public static void main(String args[]) throws Exception {
+        System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.StdErrLog");
+        System.setProperty("org.eclipse.jetty.LEVEL", "WARN");
 
         int maxThreads = 10;
         int minThreads = 1;
@@ -29,9 +32,14 @@ public class RMIHttpProxy {
         server.setConnectors(new Connector[]{connector});
 
         final ServletHandler servletHandler = new ServletHandler();
-        server.setHandler(servletHandler);
 
-        servletHandler.addServletWithMapping(RMIServletHandler.class, "/*");
+        server.setHandler(servletHandler);
+        final ServletHolder service = servletHandler.addServletWithMapping(RMIServletHandler.class, "/*");
+
+//        service.setInitParameter("rmiservlethandler.initialServerCodebase", "");
+//        service.setInitParameter("rmiservlethandler.initialServerClass", "");
+//        service.setInitParameter("rmiservlethandler.initialServerBindName", "");
+//        service.setInitParameter("rmiservlethandler.remoteHost", "");
 
         server.start();
 
