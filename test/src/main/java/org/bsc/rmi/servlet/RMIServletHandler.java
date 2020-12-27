@@ -272,7 +272,7 @@ public class RMIServletHandler extends HttpServlet {
                     server = ((UnicastRemoteObject) serverClass.newInstance());
                 }
 
-            } catch (java.lang.ClassNotFoundException cnfe) {
+            } catch (ClassNotFoundException cnfe) {
                 retry++;
 
                 /**

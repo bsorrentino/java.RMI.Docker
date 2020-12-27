@@ -1,4 +1,4 @@
-package org.bsc.rmi.transport.proxy.http.server;
+package org.bsc.rmi.proxy.http.server;
 
 import lombok.extern.java.Log;
 
@@ -41,8 +41,8 @@ class HttpInputStream extends FilterInputStream {
         do {
             line = dis.readLine();
 
-            if( log.isLoggable(Level.FINE)) {
-                log.fine(format("received header line: \"%s\"", line ));
+            if( log.isLoggable(Level.INFO)) {
+                log.info(format("received header line: \"%s\"", line ));
             }
 
             if (line == null)
@@ -74,8 +74,8 @@ class HttpInputStream extends FilterInputStream {
         }
         bytesLeftAtMark = bytesLeft;
 
-        if( log.isLoggable(Level.FINE)) {
-            log.fine(format("content length: %d", bytesLeft));
+        if( log.isLoggable(Level.INFO)) {
+            log.info(format("content length: %d", bytesLeft));
         }
     }
 
@@ -105,8 +105,8 @@ class HttpInputStream extends FilterInputStream {
             if (data != -1)
                 -- bytesLeft;
 
-            if( log.isLoggable(Level.FINE)) {
-                log.fine(
+            if( log.isLoggable(Level.INFO)) {
+                log.info(
                    "received byte: '" +
                     ((data & 0x7F) < ' ' ? " " : String.valueOf((char) data)) +
                     "' " + data);
@@ -115,7 +115,7 @@ class HttpInputStream extends FilterInputStream {
             return data;
         }
         else {
-            log.fine("read past content length");
+            log.warning("read past content length");
 
             return -1;
         }
@@ -124,7 +124,7 @@ class HttpInputStream extends FilterInputStream {
     public int read(byte b[], int off, int len) throws IOException
     {
         if (bytesLeft == 0 && len > 0) {
-            log.fine("read past content length");
+            log.warning("read past content length");
 
             return -1;
         }
@@ -133,8 +133,8 @@ class HttpInputStream extends FilterInputStream {
         int bytesRead = in.read(b, off, len);
         bytesLeft -= bytesRead;
 
-        if( log.isLoggable(Level.FINE)) {
-            log.fine("read " + bytesRead + " bytes, " + bytesLeft + " remaining");
+        if( log.isLoggable(Level.INFO)) {
+            log.info("read " + bytesRead + " bytes, " + bytesLeft + " remaining");
         }
 
         return bytesRead;

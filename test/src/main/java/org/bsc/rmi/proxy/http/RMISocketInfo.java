@@ -1,4 +1,4 @@
-package org.bsc.rmi.transport.proxy.http;
+package org.bsc.rmi.proxy.http;
 
 /**
  * RMISocketInfo is an interface that extensions of the java.net.Socket

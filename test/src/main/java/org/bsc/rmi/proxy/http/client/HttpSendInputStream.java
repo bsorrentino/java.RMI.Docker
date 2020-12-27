@@ -1,6 +1,7 @@
-package org.bsc.rmi.transport.proxy.http.client;
+package org.bsc.rmi.proxy.http.client;
 
 import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.http.client.HttpSendSocket;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -18,14 +19,14 @@ import static java.lang.String.format;
 class HttpSendInputStream extends FilterInputStream {
 
     /** the HttpSendSocket object that is providing this stream */
-    HttpSendSocket owner;
+    org.bsc.rmi.transport.proxy.http.client.HttpSendSocket owner;
 
     /**
      * Create new filter on a given input stream.
      * @param in the InputStream to filter from
      * @param owner the HttpSendSocket that is providing this stream
      */
-    public HttpSendInputStream(InputStream in, HttpSendSocket owner)
+    public HttpSendInputStream(InputStream in, org.bsc.rmi.transport.proxy.http.client.HttpSendSocket owner)
         throws IOException
     {
         super(in);

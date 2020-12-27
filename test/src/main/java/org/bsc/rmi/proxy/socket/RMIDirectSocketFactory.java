@@ -1,4 +1,4 @@
-package org.bsc.rmi.transport.proxy.socket;
+package org.bsc.rmi.proxy.socket;
 
 import java.io.IOException;
 import java.net.Socket;

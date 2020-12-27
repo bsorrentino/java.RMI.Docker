@@ -1,6 +1,8 @@
-package org.bsc.rmi.transport.proxy.http.server;
+package org.bsc.rmi.proxy.http.server;
 
 import lombok.extern.java.Log;
+import org.bsc.rmi.transport.proxy.http.server.HttpReceiveSocket;
+import org.bsc.rmi.transport.proxy.http.server.WrappedSocket;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -55,6 +57,7 @@ class HttpAwareServerSocket extends ServerSocket {
      * the underlying socket's input stream.
      * @exception IOException IO error when waiting for the connection.
      */
+    @Override
     public Socket accept() throws IOException
     {
         final Socket socket = super.accept();
