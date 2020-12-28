@@ -4,5 +4,5 @@ The mailnly goal of this project is to understand RMI and find out the best alte
 
 We are evaluating:
 
-# a revamped version of HTTP Tunneling
-# JSON-RPC
+1. a revamped version of **HTTP Tunneling**
+2. [JSON-RPC](https://www.jsonrpc.org/specification)
