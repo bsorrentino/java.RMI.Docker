@@ -20,6 +20,8 @@
         <module>rmiinterface</module>
         <module>rmiserver</module>
         <module>rmiclient</module>
+        <module>rmiservlethandler</module>
+        <module>rmiproxy</module>
     </modules>
 
 

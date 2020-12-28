@@ -1,0 +1,17 @@
+FROM kvelmurugan83/ubuntu-java8
+
+RUN apt install libxext6 -y
+RUN apt install libxrender1
+RUN apt install libxtst6
+RUN apt install libxi6
+
+RUN apt-get update
+RUN apt-get install net-tools
+
+COPY maven/ /home/soul
+
+EXPOSE 80
+
+WORKDIR /home/soul
+
+RUN chmod +x *.sh
