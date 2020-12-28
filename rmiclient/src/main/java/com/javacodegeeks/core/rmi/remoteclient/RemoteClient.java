@@ -24,7 +24,7 @@ public class RemoteClient {
 
 			log.info("Lookup Interface: remoteID:{}",Configuration.REMOTE_ID);
 			RemoteInterface rmiInterface = (RemoteInterface) reg.lookup(Configuration.REMOTE_ID);
-
+			log.info("remote interface: remoteID:{}",rmiInterface);
 			String str = "javacodegeeks rock!";
 			log.info("RMI returns:{}" , rmiInterface.capitalize(str));
 
