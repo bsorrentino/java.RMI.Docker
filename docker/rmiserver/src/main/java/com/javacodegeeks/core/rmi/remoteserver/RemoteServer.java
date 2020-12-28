@@ -10,7 +10,6 @@ import java.rmi.server.RMIServerSocketFactory;
 import com.javacodegeeks.core.rmi.rminterface.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.bsc.rmi.transport.proxy.http.RMIHttpToCGISocketFactory;
 
 @Slf4j
 public class RemoteServer {
@@ -19,12 +18,9 @@ public class RemoteServer {
 
 	public static void main(String[] args) throws RemoteException, AlreadyBoundException {
 
-		final RMIServerSocketFactory serverSocketFactory = new RMIHttpToCGISocketFactory();
-		final RMIClientSocketFactory clientSocketFactory = null;
-
 		val rmiImplementation = new RMIImplementation();
 
-		registry = LocateRegistry.createRegistry(Configuration.getRemotePort(), clientSocketFactory, serverSocketFactory);
+		registry = LocateRegistry.createRegistry(Configuration.getRemotePort());
 
 		registry.bind(Configuration.REMOTE_ID, rmiImplementation);
 

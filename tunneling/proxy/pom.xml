@@ -5,15 +5,15 @@
 
     <parent>
         <groupId>org.bsc</groupId>
-        <artifactId>rmi-sample-parent</artifactId>
+        <artifactId>rmi-tunneling-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
 
-    <artifactId>rmi-test</artifactId>
+    <artifactId>rmi-proxy-test</artifactId>
 
-    <name>RMI::Sample::Test</name>
+    <name>RMI::Tunneling::Proxy::Test</name>
 
     <description>RMI TEST</description>
 

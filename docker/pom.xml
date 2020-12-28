@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bsc</groupId>
-    <artifactId>rmi-sample-parent</artifactId>
+    <artifactId>rmi-docker-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>RMI::Sample::Parent</name>
@@ -17,7 +17,9 @@
     </properties>
 
     <modules>
-        <module>test</module>
+      <module>rmiservice</module>
+      <module>rmiserver</module>
+      <module>rmiclient</module>
     </modules>
 
 
