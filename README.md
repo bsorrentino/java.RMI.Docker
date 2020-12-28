@@ -1,25 +1,8 @@
-# java RMI in Docker Container
+## RMI Labs
 
-This is a simple example to test rmi functionalities with docker containers
+The mailnly goal of this project is to understand RMI and find out the best alternative minimising the rework on legacy projects
 
-The code is inspired by this post by Nikos Maravitsas
-[link](https://examples.javacodegeeks.com/core-java/rmi/remoteexception/java-rmi-remoteexception-how-to-solve-remoteexception/)
+We are evaluating:
 
-# Compile
-
-    mvn clean install
-    
-# Execute
-
-    docker-compose  up -d 
-    
-# Result
-You should be able to see two containers RMI_SERVER and RMI_CLIENT with the following logs:
- 1. 15:35:53.639 [main] INFO com.javacodegeeks.core.rmi.remoteserver.RemoteServer - Bindid  id:RMI_EXAMPLE port:8888
- 2. 15:35:54.362 [main] INFO com.javacodegeeks.core.rmi.remoteclient.RemoteClient - RMI returns:JAVACODEGEEKS ROCK!
-
-
-# References
-
-[Frequently Asked Questions
- Java RMI and Object Serialization](https://docs.oracle.com/javase/8/docs/technotes/guides/rmi/faq.html#classserver)
+# a revamped version of HTTP Tunneling
+# JSON-RPC
