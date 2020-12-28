@@ -40,7 +40,7 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import org.bsc.rmi.proxy.http.client.RMIHttpClientSocketFactory;
+import org.bsc.rmi.proxy.socket.client.RMIDebugClientSocketFactory;
 
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
@@ -63,28 +63,10 @@ public class SampleRMIClient {
      * @return
      */
     private static CompletableFuture<Registry> getRMIRegistry(@NonNull String host, int port) {
-        CompletableFuture<Registry> result = new CompletableFuture<>();
 
-        try {
-            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port);
-
-            result.complete(reg);
-
-        } catch (Exception e) {
-            result.completeExceptionally(e);
-        }
-        return result;
-    }
-
-    /**
-     *
-     * @param host
-     * @param port
-     * @return
-     */
-    private static CompletableFuture<Registry> getCustomRMIRegistry(@NonNull String host, int port) {
-
-        final RMIClientSocketFactory clientSocketFactory = new RMIHttpClientSocketFactory();
+        //final RMIClientSocketFactory clientSocketFactory = new RMIHttpClientSocketFactory();
+        //final RMIClientSocketFactory clientSocketFactory = RMISocketFactory.getDefaultSocketFactory();
+        final RMIClientSocketFactory clientSocketFactory = new RMIDebugClientSocketFactory();
 
         CompletableFuture<Registry> result = new CompletableFuture<>();
 
@@ -114,7 +96,7 @@ public class SampleRMIClient {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
 
-            for( int time = 1 ; time <= 10 ; ++time ) {
+            for( int time = 1 ; time <= 1 ; ++time ) {
                 final String justPassResult = robject.justPass("This is a test of the RMI servlet handler");
 
                 log.info(format("#%d - sampleRMI.justPass()=%s", time, justPassResult));
@@ -161,12 +143,13 @@ public class SampleRMIClient {
          *       samplermi.SampleRMIClient <servletHostname>
          */
 
-        System.setProperty("java.security.policy", "/Users/softphone/WORKSPACES/GITHUB.me/java.RMI.Docker/test/java.policy");
+        log.info( System.getProperty("java.security.policy") );
 
         System.setSecurityManager(new SecurityManager());
 
-        getCustomRMIRegistry(host, 80)
-        //getRMIRegistry(host, 1099)
+        int port = 1099;
+
+        getRMIRegistry(host, 1099)
                 .thenCompose(SampleRMIClient::lookup)
                 .thenCompose(SampleRMIClient::call)
                 .exceptionally(e -> {

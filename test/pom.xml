@@ -38,20 +38,6 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>rmihttpproxy</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>
-                                <argument>-Djava.security.policy=${project.basedir}/java.policy</argument>
-                                <argument>-classpath</argument>
-                                <classpath/>
-                                <argument>org.bsc.rmi.RMIHttpProxy</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>rmiserver</id>
                         <goals>
                             <goal>exec</goal>
@@ -59,6 +45,8 @@
                         <configuration>
                             <arguments>
                                 <argument>-Djava.security.policy=${project.basedir}/java.policy</argument>
+                                <argument>-Djava.util.logging.config.file=${project.basedir}/logging.properties</argument>
+
                                 <argument>-classpath</argument>
                                 <classpath/>
                                 <argument>org.bsc.rmi.sample.SampleRMIServer</argument>
@@ -73,9 +61,10 @@
                         <configuration>
                             <arguments>
                                 <argument>-Djava.security.policy=${project.basedir}/java.policy</argument>
+                                <argument>-Djava.util.logging.config.file=${project.basedir}/logging.properties</argument>
                                 <!--
-                                <argument>-D-Dhttp.proxyHost=localhost</argument>
-                                <argument>-D-Dhttp.proxyPort=80</argument>
+                                <argument>-Dhttp.proxyHost=localhost</argument>
+                                <argument>-Dhttp.proxyPort=80</argument>
                                 -->
                                 <argument>-classpath</argument>
                                 <classpath/>
