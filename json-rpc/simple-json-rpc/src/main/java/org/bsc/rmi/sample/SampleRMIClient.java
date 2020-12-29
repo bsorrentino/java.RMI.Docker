@@ -55,6 +55,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Optional;
+import java.util.logging.Level;
 
 import static java.lang.String.format;
 
@@ -69,13 +72,28 @@ public class SampleRMIClient {
         final CloseableHttpClient httpClient = HttpClients.createDefault();
         final java.net.URI uri;
 
+        @NotNull
         private HttpClientTransport(@NotNull URI uri) {
             this.uri = uri;
         }
 
+        private java.net.URI ofService( @NotNull Class<?> service ) {
+            try {
+                return new URI( uri.getScheme(),
+                                uri.getUserInfo(),
+                                uri.getHost(),
+                                uri.getPort(),
+                                format( "%s/%s", uri.getPath(), service.getCanonicalName()),
+                                uri.getQuery(),
+                                uri.getFragment());
+            } catch (URISyntaxException e) {
+                log.log( Level.WARNING, "error creating service URI", e );
+                return uri;
+            }
+        }
         @Override
-        public @NotNull String pass(@NotNull String request) throws IOException {
-            HttpPost post = new HttpPost(uri);
+        public @NotNull String pass(@NotNull Optional<Class<?>> service, @NotNull String request) throws IOException {
+            final HttpPost post = new HttpPost( service.map( this::ofService ).orElse(uri) );
             post.setEntity(new StringEntity(request, Charsets.UTF_8));
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
             try (CloseableHttpResponse httpResponse = httpClient.execute(post)) {
@@ -96,9 +114,15 @@ public class SampleRMIClient {
         final Transport transport = new HttpClientTransport(URI.create( format("http://%s/jsonrpc", host)));
         final JsonRpcClient client = new JsonRpcClient( transport );
 
-        final String result = client.onDemand(SampleRMI.class).justPass( "Hello JSON-RPC");
+        final SampleRMI remote = client.onDemand(SampleRMI.class);
+
+        final String result = remote.justPass( "Hello JSON-RPC");
 
         log.info( format( "SampleRMI.justPass() = %s", result));
+
+        final String info = remote.getInfo();
+
+        log.info( format( "SampleRMI.getInfo() = %s", info));
 
         System.exit(0);
     }

@@ -84,13 +84,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.arteam</groupId>
+            <groupId>org.bsc</groupId>
             <artifactId>simple-json-rpc-client</artifactId>
             <version>${simple-json-rpc.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.github.arteam</groupId>
+            <groupId>org.bsc</groupId>
             <artifactId>simple-json-rpc-server</artifactId>
             <version>${simple-json-rpc.version}</version>
         </dependency>
