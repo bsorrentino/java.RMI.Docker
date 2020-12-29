@@ -1,21 +1,16 @@
-/.idea/
+
+# macosx
 .DS_Store
+
+# intelliJ
+.idea/
 *.iml
-*.class
-./idea
-/DEPLOY_*
+
+# eclipse
 .metadata/
 .settings/
 .classpath
 .project
-/*/target/
-target/
-/rmiserver/target/*
-/rmiclient/target/*
-/rmiinterface/target/*
-.factorypath
 
-#
-# RMI
-#
-serverRMI.log
+# maven
+target/
