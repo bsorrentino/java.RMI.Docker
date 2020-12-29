@@ -40,6 +40,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
+                   <!-- mvn exec:exec@server -->
                     <execution>
                         <id>server</id>
                         <goals>
@@ -56,6 +57,7 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <!--  mvn exec:exec@client -->
                     <execution>
                         <id>client</id>
                         <goals>
