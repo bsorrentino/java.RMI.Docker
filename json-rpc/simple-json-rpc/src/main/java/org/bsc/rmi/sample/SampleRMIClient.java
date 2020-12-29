@@ -38,14 +38,23 @@
 
 package org.bsc.rmi.sample;
 
-import lombok.NonNull;
+import com.github.arteam.simplejsonrpc.client.JsonRpcClient;
+import com.github.arteam.simplejsonrpc.client.Transport;
+import com.google.common.net.MediaType;
 import lombok.extern.java.Log;
-import org.bsc.rmi.proxy.socket.client.RMIDebugClientSocketFactory;
+import org.apache.commons.codec.Charsets;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.jetbrains.annotations.NotNull;
 
-import java.rmi.registry.Registry;
-import java.rmi.server.RMIClientSocketFactory;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
+import java.io.Closeable;
+import java.io.IOException;
+import java.net.URI;
 
 import static java.lang.String.format;
 
@@ -55,109 +64,41 @@ import static java.lang.String.format;
 @Log
 public class SampleRMIClient {
 
+    static class HttpClientTransport implements Transport, Closeable {
 
-    /**
-     *
-     * @param host
-     * @param port
-     * @return
-     */
-    private static CompletableFuture<Registry> getRMIRegistry(@NonNull String host, int port) {
+        final CloseableHttpClient httpClient = HttpClients.createDefault();
+        final java.net.URI uri;
 
-        //final RMIClientSocketFactory clientSocketFactory = new RMIHttpClientSocketFactory();
-        //final RMIClientSocketFactory clientSocketFactory = RMISocketFactory.getDefaultSocketFactory();
-        final RMIClientSocketFactory clientSocketFactory = new RMIDebugClientSocketFactory();
-
-        CompletableFuture<Registry> result = new CompletableFuture<>();
-
-        try {
-            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, clientSocketFactory);
-
-            result.complete(reg);
-
-        } catch (Exception e) {
-            result.completeExceptionally(e);
+        private HttpClientTransport(@NotNull URI uri) {
+            this.uri = uri;
         }
-        return result;
-    }
 
-    private static CompletableFuture<SampleRMI> lookup(Registry reg) {
-        CompletableFuture<SampleRMI> result = new CompletableFuture<>();
-        try {
-            final SampleRMI robject = (SampleRMI) reg.lookup("SampleRMI");
-            result.complete(robject);
-        } catch (Exception e) {
-            result.completeExceptionally(e);
-        }
-        return result;
-    }
-
-    private static CompletableFuture<Void> call(SampleRMI robject) {
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        try {
-
-            for( int time = 1 ; time <= 1 ; ++time ) {
-                final String justPassResult = robject.justPass("This is a test of the RMI servlet handler");
-
-                log.info(format("#%d - sampleRMI.justPass()=%s", time, justPassResult));
-
-                Thread.sleep( 1000 );
+        @Override
+        public @NotNull String pass(@NotNull String request) throws IOException {
+            HttpPost post = new HttpPost(uri);
+            post.setEntity(new StringEntity(request, Charsets.UTF_8));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+            try (CloseableHttpResponse httpResponse = httpClient.execute(post)) {
+                return EntityUtils.toString(httpResponse.getEntity(), Charsets.UTF_8);
             }
-            result.complete(null);
-
-        } catch (Exception e) {
-            result.completeExceptionally(e);
         }
-        return result;
+
+        @Override
+        public void close() throws IOException {
+            httpClient.close();
+        }
     }
 
-
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
 
         final String host = (args.length < 1) ? "localhost" : args[0];
 
-        /*
-         * NOTICE: To make this example easier to set-up and run,
-         * the following call causes RMI to use a socket factory
-         * that is only capable of invoking remote methods over
-         * HTTP to a CGI script (or servlet).  This client
-         * simulates the behavior that an RMI client would have if
-         * it were forced to invoke remote calls on a server that
-         * resided outside a local firewall.
-         *
-         * It is not recommended that you make use of this sun
-         * implementation class (or any sun.* class) in general-
-         * purpose applications for the following reasons:
-         *
-         *   - Sun Microsystem's does not support the use of
-         *     sun.* classes.
-         *   - All sun.* classes are specific to Sun Microsystem's
-         *     implementation of the Java Development Kit.
-         *
-         * To fully test the example, you will need to comment out
-         * the following line of code, ensure that the client and
-         * server are on opposite sides of a firewall and set the
-         * client VM's proxy host properties as follows:
-         *
-         *   java -Dhttp.proxyHost=<proxyHost> -Dhttp.proxyPort=<proxyPort>
-         *       samplermi.SampleRMIClient <servletHostname>
-         */
+        final Transport transport = new HttpClientTransport(URI.create( format("http://%s/jsonrpc", host)));
+        final JsonRpcClient client = new JsonRpcClient( transport );
 
-        log.info( System.getProperty("java.security.policy") );
+        final String result = client.onDemand(SampleRMI.class).justPass( "Hello JSON-RPC");
 
-        System.setSecurityManager(new SecurityManager());
-
-        int port = 1099;
-
-        getRMIRegistry(host, 1099)
-                .thenCompose(SampleRMIClient::lookup)
-                .thenCompose(SampleRMIClient::call)
-                .exceptionally(e -> {
-                    log.log(Level.SEVERE, "error", e);
-                    //log.throwing(SampleRMIClient.class.getName(), "main", e);
-                    return null;
-                })
-                .join();
+        log.info( format( "SampleRMI.justPass() = %s", result));
 
         System.exit(0);
     }
