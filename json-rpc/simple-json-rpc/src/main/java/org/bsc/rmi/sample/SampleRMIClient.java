@@ -77,13 +77,13 @@ public class SampleRMIClient {
             this.uri = uri;
         }
 
-        private java.net.URI ofService( @NotNull Class<?> service ) {
+        private java.net.URI ofService( @NotNull String serviceName ) {
             try {
                 return new URI( uri.getScheme(),
                                 uri.getUserInfo(),
                                 uri.getHost(),
                                 uri.getPort(),
-                                format( "%s/%s", uri.getPath(), service.getCanonicalName()),
+                                format( "%s/%s", uri.getPath(), serviceName ),
                                 uri.getQuery(),
                                 uri.getFragment());
             } catch (URISyntaxException e) {
@@ -92,8 +92,8 @@ public class SampleRMIClient {
             }
         }
         @Override
-        public @NotNull String pass(@NotNull Optional<Class<?>> service, @NotNull String request) throws IOException {
-            final HttpPost post = new HttpPost( service.map( this::ofService ).orElse(uri) );
+        public @NotNull String pass(@NotNull Optional<String> serviceName, @NotNull String request) throws IOException {
+            final HttpPost post = new HttpPost( serviceName.map( this::ofService ).orElse(uri) );
             post.setEntity(new StringEntity(request, Charsets.UTF_8));
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
             try (CloseableHttpResponse httpResponse = httpClient.execute(post)) {
@@ -107,14 +107,16 @@ public class SampleRMIClient {
         }
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String args[]) {
 
         final String host = (args.length < 1) ? "localhost" : args[0];
 
         final Transport transport = new HttpClientTransport(URI.create( format("http://%s/jsonrpc", host)));
         final JsonRpcClient client = new JsonRpcClient( transport );
 
-        final SampleRMI remote = client.onDemand(SampleRMI.class);
+        final SampleRMI remote = client.onDemand(SampleRMI.class)
+                                    .serviceName("test")
+                                    .build();
 
         final String result = remote.justPass( "Hello JSON-RPC");
 
