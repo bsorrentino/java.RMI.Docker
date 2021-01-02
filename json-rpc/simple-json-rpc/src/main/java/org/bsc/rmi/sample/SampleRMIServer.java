@@ -42,11 +42,13 @@ import com.github.arteam.simplejsonrpc.core.annotation.JsonRpcMethod;
 import com.github.arteam.simplejsonrpc.core.annotation.JsonRpcParam;
 import com.github.arteam.simplejsonrpc.core.annotation.JsonRpcService;
 import com.github.arteam.simplejsonrpc.server.JsonRpcServer;
+import com.github.arteam.simplejsonrpc.server.JsonRpcServerRegistry;
 import com.google.common.io.CharStreams;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.java.Log;
+import org.bsc.simplejsonrpc.server.JsonRpcHttpServerRegistry;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -55,6 +57,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -85,59 +88,21 @@ public class SampleRMIServer implements SampleRMI {
      */
     public static void main(String args[]) throws Exception {
 
-        int maxThreads = 10;
-        int minThreads = 1;
-        int idleTimeout = 120;
+        final SampleRMI defaultService = new SampleRMIServer();
 
-        final QueuedThreadPool threadPool = new QueuedThreadPool(maxThreads, minThreads, idleTimeout);
-
-        final Server httpServer = new Server(threadPool);
-        final ServerConnector connector = new ServerConnector(httpServer);
-
-        connector.setPort(80);
-
-        httpServer.setConnectors(new Connector[]{connector});
-
-        final SampleRMI service = new SampleRMIServer();
 
         final JsonRpcServer rpcServer = new JsonRpcServer();
 
-        httpServer.setHandler(new AbstractHandler() {
-            @Override
-            public void handle(String target, Request baseRequest, HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
+        final JsonRpcHttpServerRegistry httpServerRegistry =
+                new JsonRpcHttpServerRegistry( rpcServer, defaultService );
 
-                log.info( format("\n>\ntarget:%s\nrequestURI:%s\n>",
-                        target,
-                        baseRequest.getRequestURI())
-                );
+        final JsonRpcHttpServerRegistry.HttpServer server = httpServerRegistry.server(80);
 
-                final String body = CharStreams.toString(baseRequest.getReader());
+        server.start();
 
-                log.info( format(">\n%s\n<", body ));
+        log.info("http server started!");
 
-                final String result = rpcServer.handle( body, service);
-
-                res.getWriter().print(result);
-                res.getWriter().flush();
-                baseRequest.setHandled(true);
-            }
-        });
-
-//        final ServletHandler servletHandler = new ServletHandler();
-//
-//        server.setHandler(servletHandler);
-//        final ServletHolder service = servletHandler.addServletWithMapping(RMIServletHandler.class, "/*");
-//
-//        service.setInitParameter("rmiservlethandler.initialServerCodebase", "");
-//        service.setInitParameter("rmiservlethandler.initialServerClass", "");
-//        service.setInitParameter("rmiservlethandler.initialServerBindName", "");
-//        service.setInitParameter("rmiservlethandler.remoteHost", "");
-
-        httpServer.start();
-
-        log.info("jetty started!");
-
-        httpServer.join();
+        server.join();
 
     }
 }
