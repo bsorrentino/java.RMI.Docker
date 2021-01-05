@@ -1,4 +1,4 @@
-package org.bsc.rmi;
+package org.bsc.rmi.proxy.http;
 
 import lombok.extern.java.Log;
 import org.bsc.rmi.servlet.RMIServletHandler;

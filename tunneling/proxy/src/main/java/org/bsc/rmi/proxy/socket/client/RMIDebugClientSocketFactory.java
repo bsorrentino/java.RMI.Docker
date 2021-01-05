@@ -43,7 +43,7 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
             if(log.isLoggable(Level.FINE)) {
-                log.fine( format("\n>\nwrite bytes( off:%d, len:%d, b.length:%d )\n%s<\n",
+                log.fine( format("\n>\nwrite bytes( off:%d, len:%d, b.length:%d )\n%s\n<",
                             off, len, b.length, formatPrintableBuffer(b,off,len)));
             }
             super.write(b, off, len);
