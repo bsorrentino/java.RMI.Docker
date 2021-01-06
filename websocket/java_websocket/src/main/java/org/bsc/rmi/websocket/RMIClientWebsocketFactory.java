@@ -171,7 +171,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
     class RMIWebSocketClient extends WebSocketClient {
 
-        final java.io.InputStream istream = new BlockedByteArrayInputStream();
+        final BlockedByteArrayInputStream istream = new BlockedByteArrayInputStream();
         final java.io.OutputStream ostream = new DelegateByteArrayOutputStream(this);
 
         public RMIWebSocketClient(URI serverUri) {
@@ -185,25 +185,14 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
         @Override
         public void onMessage(String s) {
-            log.info("onMessage bytes {}", s);
-            try {
-                ostream.write(s.getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                log.error("error writing message string back to the socket stream", e);
-            }
-
+            log.info("onMessage string {}", s);
+            istream.setDataToRead( ByteBuffer.wrap(s.getBytes(StandardCharsets.UTF_8)) );
         }
 
         @Override
         public void onMessage(ByteBuffer bb) {
             log.info("onMessage bytes {}", bb.remaining());
-            try {
-                byte[] b = new byte[bb.remaining()];
-                bb.get(b);
-                ostream.write(b);
-            } catch (IOException e) {
-                log.error("error writing message bytes back to the socket stream", e);
-            }
+            istream.setDataToRead( bb );
         }
 
         @Override
