@@ -2,14 +2,14 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
-
-import static java.lang.String.format;
 
 /**
  * RMI client to invoke calls through the ServletHandler
@@ -25,12 +25,15 @@ public class SampleRMIClient {
      */
     private static CompletableFuture<Registry> getRMIRegistry(@NonNull String host, int port) {
 
-        final RMIClientSocketFactory clientSocketFactory = RMISocketFactory.getDefaultSocketFactory();
+        final RMIClientSocketFactory clientSocketFactory[] = {
+            RMISocketFactory.getDefaultSocketFactory(),
+            new RMIClientWebsocketFactory()
+        };
 
         CompletableFuture<Registry> result = new CompletableFuture<>();
 
         try {
-            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, clientSocketFactory);
+            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, clientSocketFactory[1]);
 
             result.complete(reg);
 
@@ -79,9 +82,10 @@ public class SampleRMIClient {
 
         System.setSecurityManager(new SecurityManager());
 
-        int port = 1099;
+        int rmi_port = 1099;
+        int websocket_port = 8887;
 
-        getRMIRegistry(host, 1099)
+        getRMIRegistry(host, websocket_port)
                 .thenCompose(SampleRMIClient::lookup)
                 .thenCompose(SampleRMIClient::call)
                 .exceptionally(e -> {

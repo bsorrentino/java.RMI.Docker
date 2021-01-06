@@ -5,13 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.rmi.server.RMIClientSocketFactory;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -154,6 +155,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
             log.info( "write bytes( off:{}, len:{}, b.length:{} )", off, len, b.length);
+
             delegate.send( ByteBuffer.wrap(b, off, len) );
         }
     }
@@ -215,7 +217,11 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
             log.info("create rmi client socket - host:{} port:{}", host, port);
 
             client = new RMIWebSocketClient(java.net.URI.create(format("ws://%s:%d", host, port)));
-
+            try {
+                client.connectBlocking();
+            } catch (InterruptedException e) {
+                throw new IOException("connection interrupted!");
+            }
         }
 
         @Override

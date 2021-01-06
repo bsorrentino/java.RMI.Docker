@@ -101,6 +101,7 @@ public class RMIWebsocketServerProxy extends WebSocketServer {
         try {
             final RMIConnProxy connProxy = new RMIConnProxy(conn);
             conn.setAttachment(connProxy);
+            connProxy.start();
 
         } catch (Exception e) {
             log.error( "create RMI connection proxy error", e );
@@ -109,7 +110,7 @@ public class RMIWebsocketServerProxy extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int i, String s, boolean b) {
-        log.info("closed conn {}", conn.getRemoteSocketAddress().getAddress().getHostAddress());
+        log.info("closed conn {}", conn);
 
         getRMIConnProxy(conn).ifPresent( proxy ->  {
                 try {
