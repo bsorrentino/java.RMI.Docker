@@ -1,6 +1,8 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.websocket.RMIWebsocketServerProxy;
+import org.bsc.samples.ExampleServer;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
@@ -38,6 +40,9 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
      * This main method will not be executed from the ServletHandler.
      */
 
+    static int RMI_PORT  = 1099;
+    static int WEBSOCKET_PORT  = 8887;
+
 
     private static CompletableFuture<Void> bind( Registry reg ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
@@ -50,7 +55,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
         return result;
     }
 
-    private static CompletableFuture<Registry> createRMIRegistry(int port ) {
+    private static CompletableFuture<Registry> createRMIRegistry() {
 
         final RMIServerSocketFactory serverSocketFactory = RMISocketFactory.getDefaultSocketFactory();
         final RMIClientSocketFactory clientSocketFactory = RMISocketFactory.getDefaultSocketFactory();
@@ -58,7 +63,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
         CompletableFuture<Registry> result = new CompletableFuture<>();
 
         try {
-            final Registry reg = java.rmi.registry.LocateRegistry.createRegistry(port, clientSocketFactory, serverSocketFactory );
+            final Registry reg = java.rmi.registry.LocateRegistry.createRegistry(RMI_PORT, clientSocketFactory, serverSocketFactory );
 
             result.complete(reg);
 
@@ -68,6 +73,13 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
         return result;
     }
 
+    private static CompletableFuture<Void> startWebSocketServer( Void param ) {
+
+        final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT, RMI_PORT);
+        s.start();
+
+        return CompletableFuture.completedFuture( (Void)null );
+    }
 
     /**
      *
@@ -77,8 +89,9 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
 
         log.info( format( "java.security.policy=[%s]", System.getProperty("java.security.policy")));
 
-        createRMIRegistry(1099)
+        createRMIRegistry()
             .thenCompose( SampleRMIServer::bind )
+            .thenCompose( SampleRMIServer::startWebSocketServer )
             .exceptionally( ex -> {
                 log.error("main", ex);
                 return null;
