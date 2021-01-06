@@ -106,28 +106,20 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
         @Override
         public long skip(long n) {
-            lock.lock();
-            try {
+            synchronized (this) {
                 long k = count - pos;
                 if (n < k) {
                     k = n < 0 ? 0 : n;
                 }
-
                 pos += k;
                 return k;
-
-            } finally {
-                lock.unlock();
             }
         }
 
         @Override
         public int available() {
-            lock.lock();
-            try {
+            synchronized (this) {
                 return count - pos;
-            } finally {
-                lock.unlock();
             }
 
         }
@@ -139,11 +131,8 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
         @Override
         public void reset() {
-            lock.lock();
-            try {
+            synchronized (this) {
                 pos = 0;
-            } finally {
-                lock.unlock();
             }
 
         }
