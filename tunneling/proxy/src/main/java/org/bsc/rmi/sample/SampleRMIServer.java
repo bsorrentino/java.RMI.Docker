@@ -14,21 +14,8 @@ import static java.lang.String.format;
  * Remote object to receive calls forwarded from the ServletHandler.
  */
 @Log
-public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject implements SampleRMI {
+public class SampleRMIServer {
 
-    public SampleRMIServer() throws RemoteException {
-        super();
-    }
-
-    public String justPass(String passed) throws RemoteException {
-        log.info( format( "justPass( '%s' )", passed ));
-        return format( "string passed to remote server is [%s]", passed) ;
-    }
-
-    @Override
-    public String getInfo() throws RemoteException {
-        return "I'm a RMI server";
-    }
 
     /**
      * You should not need to run this server from the command line.
@@ -41,7 +28,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
     private static CompletableFuture<Void> bind( Registry reg ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            reg.bind( "SampleRMI", new SampleRMIServer() );
+            reg.bind( "SampleRMI", new SampleRemoteImpl() );
             result.complete( null );
         } catch (Exception e) {
             result.completeExceptionally(e);

@@ -17,7 +17,6 @@ import static java.lang.String.format;
 @Log
 public class SampleRMIClient {
 
-
     /**
      * @param host
      * @param port
@@ -42,10 +41,10 @@ public class SampleRMIClient {
         return result;
     }
 
-    private static CompletableFuture<SampleRMI> lookup(Registry reg) {
-        CompletableFuture<SampleRMI> result = new CompletableFuture<>();
+    private static CompletableFuture<SampleRemote> lookup(Registry reg) {
+        CompletableFuture<SampleRemote> result = new CompletableFuture<>();
         try {
-            final SampleRMI robject = (SampleRMI) reg.lookup("SampleRMI");
+            final SampleRemote robject = (SampleRemote) reg.lookup("SampleRMI");
             result.complete(robject);
         } catch (Exception e) {
             result.completeExceptionally(e);
@@ -53,7 +52,7 @@ public class SampleRMIClient {
         return result;
     }
 
-    private static CompletableFuture<Void> call(SampleRMI robject) {
+    private static CompletableFuture<Void> call(SampleRemote robject) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
 

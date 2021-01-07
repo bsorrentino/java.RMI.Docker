@@ -1,7 +1,6 @@
-package org.bsc.rmi;
+package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.sample.SampleRemote;
 import org.bsc.rmi.websocket.RMIWebsocketServerProxy;
 
 import java.rmi.RemoteException;

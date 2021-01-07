@@ -19,6 +19,7 @@
     <modules>
         <module>samples</module>
         <module>websocket/java_websocket</module>
+        <module>tunneling/proxy</module>
     </modules>
 
     <dependencyManagement>

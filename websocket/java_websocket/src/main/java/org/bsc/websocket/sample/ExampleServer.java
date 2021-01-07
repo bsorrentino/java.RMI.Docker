@@ -1,4 +1,4 @@
-package org.bsc.samples;
+package org.bsc.websocket.sample;
 
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.WebSocket;

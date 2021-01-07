@@ -1,4 +1,4 @@
-package org.bsc.rmi;
+package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.sample.TemperatureDispatcherImpl;

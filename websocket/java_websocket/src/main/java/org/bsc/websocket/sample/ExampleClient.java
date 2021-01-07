@@ -1,4 +1,4 @@
-package org.bsc.samples;
+package org.bsc.websocket.sample;
 
 import java.net.URI;
 import java.net.URISyntaxException;

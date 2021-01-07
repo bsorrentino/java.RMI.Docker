@@ -10,9 +10,9 @@ import static java.lang.String.format;
  * Remote object to receive calls forwarded from the ServletHandler.
  */
 @Slf4j
-public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject implements SampleRemote {
+public class SampleRemoteImpl extends java.rmi.server.UnicastRemoteObject implements SampleRemote {
 
-    public SampleRemoteServer() throws RemoteException {
+    public SampleRemoteImpl() throws RemoteException {
         super();
     }
 
