@@ -1,7 +1,6 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.sample.TemperatureDispatcherImpl;
 import org.bsc.rmi.websocket.RMIWebsocketServerProxy;
 
 import java.net.InetAddress;
