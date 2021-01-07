@@ -58,10 +58,13 @@ public class SampleRMIClient {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
 
-            for (int time = 1; time <= 1; ++time) {
-                final String justPassResult = robject.justPass("This is a test of the RMI servlet handler");
+            for (int time = 1; time <= 10; ++time) {
 
+                final String justPassResult = robject.justPass("This is a test of the RMI servlet handler");
                 log.info("#{} - sampleRMI.justPass()={}", time, justPassResult);
+
+                final String info = robject.getInfo();
+                log.info("#{} - sampleRMI.getInfo()={}", time, info);
 
                 Thread.sleep(1000);
             }
