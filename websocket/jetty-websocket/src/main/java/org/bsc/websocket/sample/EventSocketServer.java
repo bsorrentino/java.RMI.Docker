@@ -25,6 +25,7 @@ import java.util.concurrent.CountDownLatch;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.common.WebSocketSession;
 
 public class EventSocketServer extends WebSocketAdapter
 {
@@ -34,7 +35,10 @@ public class EventSocketServer extends WebSocketAdapter
     public void onWebSocketConnect(Session sess)
     {
         super.onWebSocketConnect(sess);
+
         System.out.println("Socket Connected: " + sess);
+
+
     }
 
     @Override
