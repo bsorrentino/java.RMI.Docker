@@ -21,7 +21,7 @@ public class RMIWebsocketServerProxy extends WebSocketServer {
 
     class RMIConnProxy extends Thread implements Closeable {
 
-        private final WebSocket conn;
+        final private WebSocket conn;
         final private Socket socket;
         final private java.io.OutputStream outToClient;
 
@@ -65,7 +65,7 @@ public class RMIWebsocketServerProxy extends WebSocketServer {
                 }
 
             } catch (IOException e) {
-                log.error("running thread error", e);
+                log.error("running thread error {}", e.getMessage());
             } catch (InterruptedException e) {
                 log.warn("thread interrupted");
             }
@@ -75,9 +75,12 @@ public class RMIWebsocketServerProxy extends WebSocketServer {
 
         @Override
         public void close() throws IOException {
+//            if( this.isAlive() && !this.isInterrupted() ) {
+//                log.info("try to interrupt thread!");
+//                this.interrupt();
+//            }
             outToClient.close();
             socket.close();
-            this.interrupt();
         }
     }
 
