@@ -1,5 +1,7 @@
 ## RMI over Websocket
 
+Websocket has been chosen because the RMI protocol is full-duplex that is it allowing callback that mean server can invoke client
+
 
 ## References
 
