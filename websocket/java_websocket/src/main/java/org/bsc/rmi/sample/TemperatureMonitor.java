@@ -16,13 +16,17 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
     }
 
 
+    public static TemperatureServer lookupByUrl() throws Exception {
+        final String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
+        final Remote lRemote = Naming.lookup(url);
+        return (TemperatureServer) lRemote;
+    }
+
     public static void main(String[] args)
     {
         try {
             // Lookup for the service
-            final String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
-            final Remote lRemote = Naming.lookup(url);
-            final TemperatureServer lRemoteServer = (TemperatureServer) lRemote;
+            final TemperatureServer lRemoteServer = lookupByUrl();
 
             // Display the current temperature
             log.info("Origin Temperature {}", lRemoteServer.getTemperature());

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
 import java.rmi.Naming;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -92,6 +93,12 @@ public class TemperatureServerImpl extends UnicastRemoteObject implements Temper
         return temp;
     }
 
+    public static void rebindByUrl(Remote obj ) throws Exception {
+        final String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
+        Naming.rebind(url, obj);
+
+    }
+
     public static void main(String[] args)
     {
         try
@@ -100,9 +107,7 @@ public class TemperatureServerImpl extends UnicastRemoteObject implements Temper
             // Binding the remote object (stub) in the registry
             final Registry reg = LocateRegistry.createRegistry(52369);
 
-            final String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
-
-            Naming.rebind(url, lServer);
+            rebindByUrl(lServer);
 
             //Create the thread and change the temperature
             final Thread lThread = new Thread(lServer);
