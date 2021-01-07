@@ -1,5 +1,7 @@
 package org.bsc.rmi.sample;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetAddress;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
+@Slf4j
 public class TemperatureServerImpl extends UnicastRemoteObject implements TemperatureServer, Runnable
 {
 
@@ -40,7 +42,7 @@ public class TemperatureServerImpl extends UnicastRemoteObject implements Temper
             }
             catch (InterruptedException aInE)
             {
-                System.out.println(aInE.getMessage());
+                log.error(aInE.getMessage());
             }
             //Take a number to see if up or down
             int num = lRandom.nextInt();
@@ -94,21 +96,22 @@ public class TemperatureServerImpl extends UnicastRemoteObject implements Temper
     {
         try
         {
-            TemperatureServerImpl lServer = new TemperatureServerImpl();
+            final TemperatureServerImpl lServer = new TemperatureServerImpl();
             // Binding the remote object (stub) in the registry
-            Registry reg = LocateRegistry.createRegistry(52369);
-            String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
+            final Registry reg = LocateRegistry.createRegistry(52369);
+
+            final String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
 
             Naming.rebind(url, lServer);
 
             //Create the thread and change the temperature
-            Thread lThread = new Thread(lServer);
+            final Thread lThread = new Thread(lServer);
             lThread.start();
 
         }
         catch (Exception aInE)
         {
-            System.out.println("Remote error- " + aInE);
+            log.error("Server error", aInE);
         }
     }
 }
