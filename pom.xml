@@ -4,14 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bsc</groupId>
-    <artifactId>websocket-parent</artifactId>
+    <artifactId>rmi-labs-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>java_websocket</module>
-    </modules>
     <packaging>pom</packaging>
-    <name>Websocket::Parent</name>
-    <description>simple examples to test rmi over websocket</description>
+    <name>RMI::Labs::Parent</name>
+    <description></description>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -19,6 +16,24 @@
         <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
     </properties>
 
+    <modules>
+        <module>samples</module>
+        <module>websocket/java_websocket</module>
+    </modules>
+
+    <dependencyManagement>
+
+        <dependencies>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.25</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -43,7 +58,6 @@
         </dependency>
 
     </dependencies>
-
 
     <build>
         <pluginManagement>

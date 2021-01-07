@@ -1,11 +1,10 @@
-package org.bsc.rmi.sample;
+package org.bsc.rmi;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.sample.SampleRemote;
 import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMISocketFactory;
@@ -15,8 +14,7 @@ import java.util.concurrent.CompletableFuture;
  * RMI client to invoke calls through the ServletHandler
  */
 @Slf4j
-public class SampleRMIClient {
-
+public class SampleRemoteClient {
 
     /**
      * @param host
@@ -43,10 +41,10 @@ public class SampleRMIClient {
         return result;
     }
 
-    private static CompletableFuture<SampleRMI> lookup(Registry reg) {
-        CompletableFuture<SampleRMI> result = new CompletableFuture<>();
+    private static CompletableFuture<SampleRemote> lookup(Registry reg) {
+        CompletableFuture<SampleRemote> result = new CompletableFuture<>();
         try {
-            final SampleRMI robject = (SampleRMI) reg.lookup("SampleRMI");
+            final SampleRemote robject = (SampleRemote) reg.lookup("SampleRMI");
             result.complete(robject);
         } catch (Exception e) {
             result.completeExceptionally(e);
@@ -54,7 +52,7 @@ public class SampleRMIClient {
         return result;
     }
 
-    private static CompletableFuture<Void> call(SampleRMI robject) {
+    private static CompletableFuture<Void> call(SampleRemote robject) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
 
@@ -89,8 +87,8 @@ public class SampleRMIClient {
         int websocket_port = 8887;
 
         getRMIRegistry(host, websocket_port)
-                .thenCompose(SampleRMIClient::lookup)
-                .thenCompose(SampleRMIClient::call)
+                .thenCompose(SampleRemoteClient::lookup)
+                .thenCompose(SampleRemoteClient::call)
                 .exceptionally(e -> {
                     log.error("error", e);
                     //log.throwing(SampleRMIClient.class.getName(), "main", e);

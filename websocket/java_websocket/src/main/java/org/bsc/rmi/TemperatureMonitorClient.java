@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
 
 import java.net.InetAddress;
-import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
@@ -14,12 +13,8 @@ import java.rmi.server.UnicastRemoteObject;
 
 
 @Slf4j
-public class TemperatureMonitor extends UnicastRemoteObject implements TemperatureListener
+public class TemperatureMonitorClient
 {
-
-    protected TemperatureMonitor() throws RemoteException {
-    }
-
     enum RMIClientSocketFactoryEnum {
 
         DEFAULT( RMISocketFactory.getDefaultSocketFactory() ),
@@ -32,7 +27,7 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
         }
     }
 
-    public static TemperatureServer lookupByUrl(int port, RMIClientSocketFactoryEnum s ) throws Exception {
+    public static TemperatureDispatcher lookupByUrl(int port, RMIClientSocketFactoryEnum s ) throws Exception {
         final String host = InetAddress.getLocalHost().getHostAddress();
 
         //final String url = format("rmi:/%s:%s/Hello", host, port );
@@ -42,23 +37,23 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
 
         final Remote lRemote = reg.lookup("Hello");
 
-        return (TemperatureServer) lRemote;
+        return (TemperatureDispatcher) lRemote;
     }
 
     public static void main(String[] args)
     {
         try {
             // Lookup for the service
-            //final TemperatureServer lRemoteServer = lookupByUrl(52369, RMIClientSocketFactoryEnum.DEFAULT);
-            final TemperatureServer lRemoteServer =
+            //final TemperatureServer lRemoteDispatcher = lookupByUrl(52369, RMIClientSocketFactoryEnum.DEFAULT);
+            final TemperatureDispatcher lRemoteDispatcher =
                     lookupByUrl(8887, RMIClientSocketFactoryEnum.WEBSOCKET);
 
             // Display the current temperature
-            log.info("Origin Temperature {}", lRemoteServer.getTemperature());
+            log.info("Origin Temperature {}", lRemoteDispatcher.getTemperature());
 
             // Create a temperature monitor and register it as a Listener
             final TemperatureMonitor lTemperatureMonitor = new TemperatureMonitor();
-            lRemoteServer.addTemperatureListener(lTemperatureMonitor);
+            lRemoteDispatcher.addTemperatureListener(lTemperatureMonitor);
 
         }
         catch (Exception aInE) {
@@ -66,8 +61,4 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
         }
     }
 
-    @Override
-    public void temperatureChanged(double temperature) throws RemoteException {
-        log.info("Temperature change event {}", temperature);
-    }
 }

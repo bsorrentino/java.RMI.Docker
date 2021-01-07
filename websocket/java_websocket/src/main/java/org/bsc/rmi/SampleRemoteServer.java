@@ -1,8 +1,8 @@
-package org.bsc.rmi.sample;
+package org.bsc.rmi;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.sample.SampleRemote;
 import org.bsc.rmi.websocket.RMIWebsocketServerProxy;
-import org.bsc.samples.ExampleServer;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
@@ -17,9 +17,9 @@ import static java.lang.String.format;
  * Remote object to receive calls forwarded from the ServletHandler.
  */
 @Slf4j
-public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject implements SampleRMI {
+public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject implements SampleRemote {
 
-    public SampleRMIServer() throws RemoteException {
+    public SampleRemoteServer() throws RemoteException {
         super();
     }
 
@@ -47,7 +47,7 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
     private static CompletableFuture<Void> bind( Registry reg ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            reg.bind( "SampleRMI", new SampleRMIServer() );
+            reg.bind( "SampleRMI", new SampleRemoteServer() );
             result.complete( null );
         } catch (Exception e) {
             result.completeExceptionally(e);
@@ -90,8 +90,8 @@ public class SampleRMIServer extends java.rmi.server.UnicastRemoteObject impleme
         log.info( format( "java.security.policy=[%s]", System.getProperty("java.security.policy")));
 
         createRMIRegistry()
-            .thenCompose( SampleRMIServer::bind )
-            .thenCompose( SampleRMIServer::startWebSocketServer )
+            .thenCompose( SampleRemoteServer::bind )
+            .thenCompose( SampleRemoteServer::startWebSocketServer )
             .exceptionally( ex -> {
                 log.error("main", ex);
                 return null;

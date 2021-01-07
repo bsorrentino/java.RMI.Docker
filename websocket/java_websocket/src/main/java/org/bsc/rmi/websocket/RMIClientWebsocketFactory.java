@@ -22,7 +22,7 @@ import static java.lang.String.format;
 @Slf4j
 public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
-    class BlockingByteArrayInputStream extends InputStream {
+    static class BlockingByteArrayInputStream extends InputStream {
 
         private byte buf[];
         private int pos;
@@ -137,7 +137,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
     }
 
-    class DelegateByteArrayOutputStream extends java.io.OutputStream {
+    static class DelegateByteArrayOutputStream extends java.io.OutputStream {
         final RMIWebSocketClient delegate;
 
         DelegateByteArrayOutputStream(RMIWebSocketClient delegate) {
@@ -157,7 +157,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         }
     }
 
-    class RMIWebSocketClient extends WebSocketClient {
+    static class RMIWebSocketClient extends WebSocketClient {
 
         final BlockingByteArrayInputStream  istream = new BlockingByteArrayInputStream();
         final java.io.OutputStream          ostream = new DelegateByteArrayOutputStream(this);
@@ -205,7 +205,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
     }
 
     @EqualsAndHashCode
-    class WebSocketClientProxy extends Socket {
+    static class WebSocketClientProxy extends Socket {
         final RMIWebSocketClient client;
 
         public WebSocketClientProxy(String host, int port) throws IOException {

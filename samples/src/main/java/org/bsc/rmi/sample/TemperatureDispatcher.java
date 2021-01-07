@@ -3,7 +3,7 @@ package org.bsc.rmi.sample;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-interface TemperatureServer extends Remote
+interface TemperatureDispatcher extends Remote
 {
 
     void addTemperatureListener(TemperatureListener addTemperatureListener) throws RemoteException;
