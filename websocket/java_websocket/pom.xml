@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>java_websocket</artifactId>
-    <name>RMI::Websocket::java_websocket::Impl</name>
+    <name>RMI::Websocket::Java-Websocket::Impl</name>
     <properties>
     </properties>
 

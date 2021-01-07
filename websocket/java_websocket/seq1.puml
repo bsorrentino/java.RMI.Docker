@@ -1,3 +1,5 @@
 @startuml
 
+participant client
+participant LocalRegistry <<RMI>>
 @enduml

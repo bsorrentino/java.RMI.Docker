@@ -20,6 +20,7 @@
         <module>samples</module>
         <module>websocket/java_websocket</module>
         <module>tunneling/proxy</module>
+        <module>websocket/jetty-websocket</module>
     </modules>
 
     <dependencyManagement>
