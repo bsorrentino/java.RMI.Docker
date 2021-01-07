@@ -1,6 +1,7 @@
 package org.bsc.rmi.websocket;
 
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -21,29 +22,29 @@ import static java.lang.String.format;
 @Slf4j
 public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
-    class BlockedByteArrayInputStream extends InputStream {
+    class BlockingByteArrayInputStream extends InputStream {
 
-        byte buf[];
-        int pos;
-        int count;
+        private byte buf[];
+        private int pos;
+        private int count;
 
         final ReentrantLock lock = new ReentrantLock();
         final Condition notEmpty = lock.newCondition();
 
-        public BlockedByteArrayInputStream() {
+        public BlockingByteArrayInputStream() {
             this.buf = null;
             this.pos = 0;
             this.count = 0;
         }
 
-//            public BlockedByteArrayInputStream(byte buf[], int offset, int length) {
-//                this.buf = buf;
-//                this.pos = offset;
-//                this.count = Math.min(offset + length, buf.length);
-//                this.mark = offset;
-//            }
+//        public BlockedByteArrayInputStream(byte buf[], int offset, int length) {
+//            this.buf = buf;
+//            this.pos = offset;
+//            this.count = Math.min(offset + length, buf.length);
+//            this.mark = offset;
+//        }
 
-        protected void setDataToRead( ByteBuffer bb ) {
+        protected void setMessage(@NonNull ByteBuffer bb) {
             lock.lock();
             try {
                 buf = new byte[bb.remaining()];
@@ -54,9 +55,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
             } finally {
                 lock.unlock();
             }
-
         }
-
 
         @Override
         public int read() {
@@ -122,7 +121,6 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
             synchronized (this) {
                 return count - pos;
             }
-
         }
 
         @Override
@@ -135,7 +133,6 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
             synchronized (this) {
                 pos = 0;
             }
-
         }
 
     }
@@ -162,8 +159,8 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
     class RMIWebSocketClient extends WebSocketClient {
 
-        final BlockedByteArrayInputStream istream = new BlockedByteArrayInputStream();
-        final java.io.OutputStream ostream = new DelegateByteArrayOutputStream(this);
+        final BlockingByteArrayInputStream  istream = new BlockingByteArrayInputStream();
+        final java.io.OutputStream          ostream = new DelegateByteArrayOutputStream(this);
 
         public RMIWebSocketClient(URI serverUri) {
             super(serverUri);
@@ -177,13 +174,13 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         @Override
         public void onMessage(String s) {
             log.info("onMessage string {}", s);
-            istream.setDataToRead( ByteBuffer.wrap(s.getBytes(StandardCharsets.UTF_8)) );
+            istream.setMessage( ByteBuffer.wrap(s.getBytes(StandardCharsets.UTF_8)) );
         }
 
         @Override
         public void onMessage(ByteBuffer bb) {
             log.info("onMessage bytes {}", bb.remaining());
-            istream.setDataToRead( bb );
+            istream.setMessage( bb );
         }
 
         @Override
@@ -192,12 +189,12 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
             try {
                 istream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error( "error closing the input stream", e);
             }
             try {
                 ostream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error( "error closing the output stream", e);
             }
         }
 
