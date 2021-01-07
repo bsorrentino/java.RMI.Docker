@@ -1,12 +1,17 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
 
 import java.net.InetAddress;
 import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.registry.Registry;
+import java.rmi.server.RMIClientSocketFactory;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
+
 
 @Slf4j
 public class TemperatureMonitor extends UnicastRemoteObject implements TemperatureListener
@@ -15,10 +20,28 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
     protected TemperatureMonitor() throws RemoteException {
     }
 
+    enum RMIClientSocketFactoryEnum {
 
-    public static TemperatureServer lookupByUrl() throws Exception {
-        final String url = "rmi://" + InetAddress.getLocalHost().getHostAddress() + ":52369/Hello";
-        final Remote lRemote = Naming.lookup(url);
+        DEFAULT( RMISocketFactory.getDefaultSocketFactory() ),
+        WEBSOCKET( new RMIClientWebsocketFactory());
+
+        RMIClientSocketFactory factory;
+
+        RMIClientSocketFactoryEnum( RMIClientSocketFactory factory ) {
+            this.factory = factory;
+        }
+    }
+
+    public static TemperatureServer lookupByUrl(int port, RMIClientSocketFactoryEnum s ) throws Exception {
+        final String host = InetAddress.getLocalHost().getHostAddress();
+
+        //final String url = format("rmi:/%s:%s/Hello", host, port );
+        //final Remote lRemote = Naming.lookup(url);
+
+        final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, s.factory);
+
+        final Remote lRemote = reg.lookup("Hello");
+
         return (TemperatureServer) lRemote;
     }
 
@@ -26,7 +49,9 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
     {
         try {
             // Lookup for the service
-            final TemperatureServer lRemoteServer = lookupByUrl();
+            //final TemperatureServer lRemoteServer = lookupByUrl(52369, RMIClientSocketFactoryEnum.DEFAULT);
+            final TemperatureServer lRemoteServer =
+                    lookupByUrl(8887, RMIClientSocketFactoryEnum.WEBSOCKET);
 
             // Display the current temperature
             log.info("Origin Temperature {}", lRemoteServer.getTemperature());

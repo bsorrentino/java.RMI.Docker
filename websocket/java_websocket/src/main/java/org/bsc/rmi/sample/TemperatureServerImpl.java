@@ -1,6 +1,7 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.websocket.RMIWebsocketServerProxy;
 
 import java.net.InetAddress;
 import java.rmi.Naming;
@@ -12,6 +13,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class TemperatureServerImpl extends UnicastRemoteObject implements TemperatureServer, Runnable
@@ -99,10 +101,18 @@ public class TemperatureServerImpl extends UnicastRemoteObject implements Temper
 
     }
 
+    private static void startWebSocketServer() {
+
+        final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(8887, 52369);
+        s.start();
+    }
+
     public static void main(String[] args)
     {
         try
         {
+            startWebSocketServer();
+
             final TemperatureServerImpl lServer = new TemperatureServerImpl();
             // Binding the remote object (stub) in the registry
             final Registry reg = LocateRegistry.createRegistry(52369);
