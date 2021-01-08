@@ -29,8 +29,6 @@ import org.eclipse.jetty.websocket.common.WebSocketSession;
 
 public class EventSocketServer extends WebSocketAdapter
 {
-    private CountDownLatch closureLatch = new CountDownLatch(1);
-
     @Override
     public void onWebSocketConnect(Session sess)
     {
@@ -65,7 +63,6 @@ public class EventSocketServer extends WebSocketAdapter
     {
         super.onWebSocketClose(statusCode, reason);
         System.out.println("Socket Closed: [" + statusCode + "] " + reason);
-        closureLatch.countDown();
     }
 
     @Override
@@ -75,9 +72,4 @@ public class EventSocketServer extends WebSocketAdapter
         cause.printStackTrace(System.err);
     }
 
-    public void awaitClosure() throws InterruptedException
-    {
-        System.out.println("Awaiting closure from remote");
-        closureLatch.await();
-    }
 }

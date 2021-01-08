@@ -234,7 +234,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
             client.start();
 
-            final java.net.URI uri = java.net.URI.create(format("ws://%s:%d", host, port));
+            final java.net.URI uri = java.net.URI.create(format("ws://%s:%d/rmi", host, port));
 
             Future<Session> sessionFuture = client.connect(listener,uri);
 
@@ -254,22 +254,13 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
     }
 
-    /**
-     * Create a client socket connected to the specified host and port.
-     *
-     * @param host the host name
-     * @param port the port number
-     * @return a socket connected to the specified host and port.
-     * @throws IOException if an I/O error occurs during socket creation
-     * @since 1.2
-     */
     @Override
     public Socket createSocket(String host, int port) throws IOException {
         try {
             return new WebSocketClientProxy(host, port);
         } catch (IOException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new IOException(e);
         }
     }
