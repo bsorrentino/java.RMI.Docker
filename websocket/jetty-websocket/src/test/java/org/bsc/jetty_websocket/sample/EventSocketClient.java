@@ -1,4 +1,4 @@
-package org.bsc.websocket.sample;
+package org.bsc.jetty_websocket.sample;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;

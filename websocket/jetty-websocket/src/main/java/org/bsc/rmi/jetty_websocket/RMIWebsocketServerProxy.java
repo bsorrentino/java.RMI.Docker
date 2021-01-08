@@ -1,19 +1,16 @@
-package org.bsc.rmi.websocket;
+package org.bsc.rmi.jetty_websocket;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.websocket.sample.EventSocketServer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
 import org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer;
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 
-import javax.servlet.ServletException;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
@@ -27,7 +24,7 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public class RMIWebsocketServerProxy  {
 
-    class RMIConnProxy extends Thread implements Closeable, LifeCycle.Listener {
+    class RMIConnProxy extends Thread implements Closeable {
 
         final private WebSocketSession session;
         final private Socket socket;
@@ -40,13 +37,14 @@ public class RMIWebsocketServerProxy  {
 
             outToClient = socket.getOutputStream();
 
-            session.addLifeCycleListener( this );
         }
 
 
         int setMessage(@NonNull ByteBuffer bb) {
             if( outToClient == null )
                 throw new IllegalStateException("output stream id null");
+            if( log.isDebugEnabled() )
+                log.debug( "write bytes {}",bb.remaining() );
 
             try {
                 byte[] buf = new byte[bb.remaining()];
@@ -70,7 +68,7 @@ public class RMIWebsocketServerProxy  {
 
                 while ((bytes_read = inFromClient.read(buf)) != -1) {
 
-                    log.info("send {} bytes to websocket", bytes_read);
+                    log.debug("send {} bytes to websocket", bytes_read);
                     session.getRemote().sendBytes(ByteBuffer.wrap(buf, 0, bytes_read));
                     Thread.sleep(100);
                 }
@@ -93,39 +91,7 @@ public class RMIWebsocketServerProxy  {
 //            }
             outToClient.close();
             socket.close();
-            session.removeLifeCycleListener( this );
 
-        }
-
-        @Override
-        public void lifeCycleStarting(LifeCycle lifeCycle) {
-            log.trace( "session starting" );
-        }
-
-        @Override
-        public void lifeCycleStarted(LifeCycle lifeCycle) {
-            log.trace( "session started" );
-            start();
-        }
-
-        @Override
-        public void lifeCycleFailure(LifeCycle lifeCycle, Throwable throwable) {
-            log.trace( "session failure", throwable );
-        }
-
-        @Override
-        public void lifeCycleStopping(LifeCycle lifeCycle) {
-            log.trace( "session stopping" );
-        }
-
-        @Override
-        public void lifeCycleStopped(LifeCycle lifeCycle) {
-            log.trace( "session stopped" );
-            try {
-                close();
-            } catch (IOException e) {
-                log.warn( "error closing RMI Session Proxy", e);
-            }
         }
     }
 
@@ -154,13 +120,14 @@ public class RMIWebsocketServerProxy  {
         {
             super.onWebSocketConnect(sess);
 
-            log.info("connected session {}",sess);
+            log.debug("connected session {}",sess);
 
             asWebSocketSession( sess ).ifPresent( wsess -> {
                 try {
 
                     final RMIConnProxy connProxy = new RMIConnProxy(wsess);
                     wsess.addBean( connProxy, false);
+                    connProxy.start();
 
                 } catch (Exception e) {
                     log.error("create RMI session proxy error", e);
@@ -171,8 +138,20 @@ public class RMIWebsocketServerProxy  {
         @Override
         public void onWebSocketClose(int statusCode, String reason)
         {
-            super.onWebSocketClose(statusCode, reason);
             log.info("closed conn {}, {}", statusCode, reason);
+
+            asWebSocketSession( getSession() ).ifPresent( wsess -> {
+                try {
+
+                    final RMIConnProxy proxy = wsess.getBean( RMIConnProxy.class);
+                    proxy.close();
+
+                } catch (Exception e) {
+                    log.warn( "error closing RMI Session Proxy", e);
+                }
+            });
+            super.onWebSocketClose(statusCode, reason);
+
         }
 
         @Override

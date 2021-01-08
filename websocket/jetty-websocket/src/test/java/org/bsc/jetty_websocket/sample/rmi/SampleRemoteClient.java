@@ -1,8 +1,9 @@
-package org.bsc.rmi.sample;
+package org.bsc.jetty_websocket.sample.rmi;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.jetty_websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.sample.SampleRemote;
 
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
@@ -78,7 +79,7 @@ public class SampleRemoteClient {
 
         final String host = (args.length < 1) ? "localhost" : args[0];
 
-        log.info(System.getProperty("java.security.policy"));
+        log.debug(System.getProperty("java.security.policy"));
 
         System.setSecurityManager(new SecurityManager());
 

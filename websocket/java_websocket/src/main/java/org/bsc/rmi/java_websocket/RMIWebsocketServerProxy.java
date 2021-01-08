@@ -1,4 +1,4 @@
-package org.bsc.rmi.websocket;
+package org.bsc.rmi.java_websocket;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

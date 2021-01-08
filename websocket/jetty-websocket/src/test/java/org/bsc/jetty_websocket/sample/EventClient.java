@@ -16,7 +16,7 @@
 //  ========================================================================
 //
 
-package org.bsc.websocket.sample;
+package org.bsc.jetty_websocket.sample;
 
 import java.net.URI;
 import java.util.concurrent.Future;

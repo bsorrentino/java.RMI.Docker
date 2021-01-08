@@ -10,7 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
 public class TemperatureMonitor extends UnicastRemoteObject implements TemperatureListener
 {
 
-    protected TemperatureMonitor() throws RemoteException {}
+    public TemperatureMonitor() throws RemoteException {}
 
     @Override
     public void temperatureChanged(double temperature) throws RemoteException {

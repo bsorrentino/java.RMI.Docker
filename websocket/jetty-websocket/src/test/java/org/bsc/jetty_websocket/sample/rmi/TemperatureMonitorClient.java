@@ -1,7 +1,10 @@
-package org.bsc.rmi.sample;
+package org.bsc.jetty_websocket.sample.rmi;
+
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.jetty_websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.sample.TemperatureDispatcher;
+import org.bsc.rmi.sample.TemperatureMonitor;
 
 import java.net.InetAddress;
 import java.rmi.Remote;

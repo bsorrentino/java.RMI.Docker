@@ -63,7 +63,7 @@ public class TemperatureDispatcherImpl extends UnicastRemoteObject implements Te
             {
                 lListener.temperatureChanged(aInTemp);
             }
-            catch (RemoteException aInE)
+            catch (Exception aInE)
             {
                 listeners.remove(lListener);
             }

@@ -2,7 +2,7 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.java_websocket.RMIClientWebsocketFactory;
 
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;

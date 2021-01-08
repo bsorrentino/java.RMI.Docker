@@ -1,7 +1,9 @@
-package org.bsc.rmi.sample;
+package org.bsc.jetty_websocket.sample.rmi;
+
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.websocket.RMIWebsocketServerProxy;
+import org.bsc.rmi.jetty_websocket.RMIWebsocketServerProxy;
+import org.bsc.rmi.sample.SampleRemote;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
@@ -93,7 +95,7 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
      */
     public static void main(String args[]) {
 
-        log.info( format( "java.security.policy=[%s]", System.getProperty("java.security.policy")));
+        log.debug( "java.security.policy={}", System.getProperty("java.security.policy"));
 
         createRMIRegistry()
             .thenCompose( SampleRemoteServer::bind )

@@ -1,21 +1,19 @@
-package org.bsc.rmi.websocket;
+package org.bsc.rmi.java_websocket;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.rmi.server.RMIClientSocketFactory;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -140,9 +138,9 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
     }
 
     static class DelegateByteArrayOutputStream extends java.io.OutputStream {
-        final RMIWebSocketClientListener delegate;
+        final RMIWebSocketClient delegate;
 
-        DelegateByteArrayOutputStream(RMIWebSocketClientListener delegate) {
+        DelegateByteArrayOutputStream(RMIWebSocketClient delegate) {
             this.delegate = delegate;
         }
 
@@ -155,49 +153,39 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         public void write(byte[] b, int off, int len) throws IOException {
             log.info( "write bytes( off:{}, len:{}, b.length:{} )", off, len, b.length);
 
-            delegate.getSession().getRemote().sendBytes( ByteBuffer.wrap(b, off, len) );
+            delegate.send( ByteBuffer.wrap(b, off, len) );
         }
     }
 
-    static class RMIWebSocketClientListener extends WebSocketAdapter {
-        final private CountDownLatch closureLatch = new CountDownLatch(1);
+    static class RMIWebSocketClient extends WebSocketClient {
 
         final BlockingByteArrayInputStream  istream = new BlockingByteArrayInputStream();
         final java.io.OutputStream          ostream = new DelegateByteArrayOutputStream(this);
 
-        public RMIWebSocketClientListener() {
+        public RMIWebSocketClient(URI serverUri) {
+            super(serverUri);
         }
 
         @Override
-        public void onWebSocketConnect(Session sess)
-        {
-            super.onWebSocketConnect(sess);
-            log.info("onOpen {}", sess);
-        }
-
-
-        @Override
-        public void onWebSocketText(String message)
-        {
-            super.onWebSocketText(message);
-            log.info("onMessage string {}", message);
-            istream.setMessage( ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)) );
-
+        public void onOpen(ServerHandshake serverHandshake) {
+            log.info("onOpen {}", serverHandshake.getHttpStatusMessage());
         }
 
         @Override
-        public void onWebSocketBinary(byte[] payload, int offset, int len) {
-            super.onWebSocketBinary(payload, offset, len);
-
-            log.info("onMessage bytes {}", len);
-            istream.setMessage( ByteBuffer.wrap(payload,offset,len) );
+        public void onMessage(String s) {
+            log.info("onMessage string {}", s);
+            istream.setMessage( ByteBuffer.wrap(s.getBytes(StandardCharsets.UTF_8)) );
         }
 
         @Override
-        public void onWebSocketClose(int statusCode, String reason)
-        {
-            super.onWebSocketClose(statusCode, reason);
-            log.info("onClose( {}, {} )", statusCode, reason);
+        public void onMessage(ByteBuffer bb) {
+            log.info("onMessage bytes {}", bb.remaining());
+            istream.setMessage( bb );
+        }
+
+        @Override
+        public void onClose(int i, String s, boolean b) {
+            log.info("onClose( {}, {}, {} )", i, s, b);
             try {
                 istream.close();
             } catch (IOException e) {
@@ -208,60 +196,55 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
             } catch (IOException e) {
                 log.error( "error closing the output stream", e);
             }
-            closureLatch.countDown();
         }
 
         @Override
-        public void onWebSocketError(Throwable cause)
-        {
-            super.onWebSocketError(cause);
-            log.error("web socket error", cause);
-
+        public void onError(Exception e) {
+            log.error("web socket error", e);
         }
     }
 
     @EqualsAndHashCode
     static class WebSocketClientProxy extends Socket {
-        final RMIWebSocketClientListener listener;
-        final WebSocketClient client = new WebSocketClient();
+        final RMIWebSocketClient client;
 
-        public WebSocketClientProxy(String host, int port) throws Exception {
+        public WebSocketClientProxy(String host, int port) throws IOException {
             super(host, port);
 
             log.info("create rmi client socket - host:{} port:{}", host, port);
 
-            listener = new RMIWebSocketClientListener();
-
-            client.start();
-
-            final java.net.URI uri = java.net.URI.create(format("ws://%s:%d/rmi", host, port));
-
-            Future<Session> sessionFuture = client.connect(listener,uri);
-
-            sessionFuture.get();
+            client = new RMIWebSocketClient(java.net.URI.create(format("ws://%s:%d", host, port)));
+            try {
+                client.connectBlocking();
+            } catch (InterruptedException e) {
+                throw new IOException("connection interrupted!");
+            }
         }
 
         @Override
         public InputStream getInputStream() throws IOException {
-            return listener.istream;
+            return client.istream;
         }
 
         @Override
         public OutputStream getOutputStream() throws IOException {
-            return listener.ostream;
+            return client.ostream;
         }
 
 
     }
 
+    /**
+     * Create a client socket connected to the specified host and port.
+     *
+     * @param host the host name
+     * @param port the port number
+     * @return a socket connected to the specified host and port.
+     * @throws IOException if an I/O error occurs during socket creation
+     * @since 1.2
+     */
     @Override
     public Socket createSocket(String host, int port) throws IOException {
-        try {
-            return new WebSocketClientProxy(host, port);
-        } catch (IOException e) {
-            throw e;
-        } catch (Throwable e) {
-            throw new IOException(e);
-        }
+        return new WebSocketClientProxy(host, port);
     }
 }

@@ -1,7 +1,7 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.java_websocket.RMIClientWebsocketFactory;
 
 import java.net.InetAddress;
 import java.rmi.Remote;
