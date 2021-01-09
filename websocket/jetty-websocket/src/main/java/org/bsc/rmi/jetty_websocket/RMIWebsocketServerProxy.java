@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
 import org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer;
@@ -24,13 +25,13 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public class RMIWebsocketServerProxy  {
 
-    class RMIConnProxy extends Thread implements Closeable {
+    static class RMIConnProxy extends Thread implements Closeable {
 
         final private WebSocketSession session;
         final private Socket socket;
         final private java.io.OutputStream outToClient;
 
-        public RMIConnProxy(@NonNull WebSocketSession session) throws Exception {
+        public RMIConnProxy(@NonNull WebSocketSession session, int rmi_port) throws Exception {
             super("RMIConnProxy");
             this.session = session;
             socket = new Socket(session.getLocalAddress().getHostName(), rmi_port);
@@ -95,7 +96,7 @@ public class RMIWebsocketServerProxy  {
         }
     }
 
-    class Listener extends WebSocketAdapter {
+    static class Listener extends WebSocketAdapter {
 
         public Listener() {
         }
@@ -120,12 +121,19 @@ public class RMIWebsocketServerProxy  {
         {
             super.onWebSocketConnect(sess);
 
-            log.debug("connected session {}",sess);
+            final UpgradeRequest req = sess.getUpgradeRequest();
+
+            final int rmi_port = req.getHeaderInt("rmi_port");
+
+            log.debug("connected session\nuri={}\nrmi_port={}",
+                    req.getRequestURI(),
+                    rmi_port);
+
 
             asWebSocketSession( sess ).ifPresent( wsess -> {
                 try {
 
-                    final RMIConnProxy connProxy = new RMIConnProxy(wsess);
+                    final RMIConnProxy connProxy = new RMIConnProxy(wsess, rmi_port);
                     wsess.addBean( connProxy, false);
                     connProxy.start();
 
@@ -186,11 +194,7 @@ public class RMIWebsocketServerProxy  {
     }
     final Server server = new Server();
 
-    final int rmi_port;
-
-    public RMIWebsocketServerProxy(int websocket_port, int rmi_port) throws Exception {
-
-        this.rmi_port = rmi_port;
+    public RMIWebsocketServerProxy(int websocket_port) throws Exception {
 
         final ServerConnector connector = new ServerConnector(server);
         connector.setPort(websocket_port);

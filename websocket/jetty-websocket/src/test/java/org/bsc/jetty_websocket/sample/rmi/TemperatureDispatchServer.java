@@ -16,18 +16,15 @@ import java.rmi.server.RMISocketFactory;
 import static java.lang.String.format;
 
 @Slf4j
-public class TemperatureDispatchServer
+public class TemperatureDispatchServer implements Constants
 {
-    public static final int RMI_PORT = 52369;
-    public static final int WEBSOCKET_PORT = 8887;
-
     public static void rebindByUrl(Remote obj ) throws Exception {
         final String url = format( "rmi://%s:%d/Hello",InetAddress.getLocalHost().getHostAddress(), RMI_PORT);
         Naming.rebind(url, obj);
     }
 
     private static void startWebSocketServer() throws Exception {
-        final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT, RMI_PORT);
+        final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
         s.start();
     }
 

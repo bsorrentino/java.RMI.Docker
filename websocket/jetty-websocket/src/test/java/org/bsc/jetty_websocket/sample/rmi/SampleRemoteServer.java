@@ -77,7 +77,7 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
     private static CompletableFuture<Void> startWebSocketServer( Void param ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT, RMI_PORT);
+            final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
             s.start();
 
             result.complete( null );

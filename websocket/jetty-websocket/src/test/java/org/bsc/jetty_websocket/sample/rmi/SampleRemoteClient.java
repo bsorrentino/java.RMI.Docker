@@ -15,6 +15,8 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 public class SampleRemoteClient {
+    static final int RMI_PORT = 1099;
+    static final int WEBSOCKET_PORT = 8887;
 
     /**
      * @param host
@@ -25,7 +27,7 @@ public class SampleRemoteClient {
 
         final RMIClientSocketFactory clientSocketFactory[] = {
             RMISocketFactory.getDefaultSocketFactory(),
-            new RMIClientWebsocketFactory()
+            new RMIClientWebsocketFactory(WEBSOCKET_PORT)
         };
 
         CompletableFuture<Registry> result = new CompletableFuture<>();
@@ -83,10 +85,8 @@ public class SampleRemoteClient {
 
         System.setSecurityManager(new SecurityManager());
 
-        int rmi_port = 1099;
-        int websocket_port = 8887;
 
-        getRMIRegistry(host, websocket_port)
+        getRMIRegistry(host, RMI_PORT)
                 .thenCompose(SampleRemoteClient::lookup)
                 .thenCompose(SampleRemoteClient::call)
                 .exceptionally(e -> {

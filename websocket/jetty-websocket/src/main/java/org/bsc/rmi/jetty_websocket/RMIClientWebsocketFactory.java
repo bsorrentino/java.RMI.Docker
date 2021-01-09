@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import java.io.IOException;
@@ -172,7 +173,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         public void onWebSocketConnect(Session sess)
         {
             super.onWebSocketConnect(sess);
-            log.info("onOpen {}", sess);
+            log.debug("onWebSocketConnect( {} )", sess);
         }
 
 
@@ -180,7 +181,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         public void onWebSocketText(String message)
         {
             super.onWebSocketText(message);
-            log.info("onMessage string {}", message);
+            log.debug("onMessage string {}", message);
             istream.setMessage( ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)) );
 
         }
@@ -189,7 +190,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         public void onWebSocketBinary(byte[] payload, int offset, int len) {
             super.onWebSocketBinary(payload, offset, len);
 
-            log.info("onMessage bytes {}", len);
+            log.debug("onMessage bytes {}", len);
             istream.setMessage( ByteBuffer.wrap(payload,offset,len) );
         }
 
@@ -197,7 +198,7 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         public void onWebSocketClose(int statusCode, String reason)
         {
             super.onWebSocketClose(statusCode, reason);
-            log.info("onClose( {}, {} )", statusCode, reason);
+            log.debug("onWebSocketClose( {}, {} )", statusCode, reason);
             try {
                 istream.close();
             } catch (IOException e) {
@@ -221,22 +222,28 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
     }
 
     @EqualsAndHashCode
-    static class WebSocketClientProxy extends Socket {
+    class WebSocketClientProxy extends Socket {
         final RMIWebSocketClientListener listener;
         final WebSocketClient client = new WebSocketClient();
 
-        public WebSocketClientProxy(String host, int port) throws Exception {
-            super(host, port);
+        public WebSocketClientProxy(String host, int rmi_port) throws Exception {
+            super(host, websocket_port);
 
-            log.info("create rmi client socket - host:{} port:{}", host, port);
+            log.debug("create rmi client socket - host:{} rmi port:{} websocket port:{}",
+                    host,
+                    rmi_port,
+                    websocket_port);
 
             listener = new RMIWebSocketClientListener();
 
             client.start();
 
-            final java.net.URI uri = java.net.URI.create(format("ws://%s:%d/rmi", host, port));
+            final java.net.URI uri = java.net.URI.create(format("ws://%s:%d/rmi", host, websocket_port));
 
-            Future<Session> sessionFuture = client.connect(listener,uri);
+            final ClientUpgradeRequest request = new ClientUpgradeRequest();
+            request.setHeader("rmi_port", String.valueOf(rmi_port));
+
+            Future<Session> sessionFuture = client.connect(listener,uri, request);
 
             sessionFuture.get();
         }
@@ -254,10 +261,20 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
     }
 
+    final int websocket_port;
+
+    public RMIClientWebsocketFactory(int websocket_port) {
+        this.websocket_port = websocket_port;
+    }
+
+    public int getWebsocketPort() {
+        return websocket_port;
+    }
+
     @Override
-    public Socket createSocket(String host, int port) throws IOException {
+    public Socket createSocket(String host, int rmi_port) throws IOException {
         try {
-            return new WebSocketClientProxy(host, port);
+            return new WebSocketClientProxy(host, rmi_port);
         } catch (IOException e) {
             throw e;
         } catch (Throwable e) {
