@@ -1,17 +1,14 @@
-package org.bsc.rmi.proxy.socket.server;
+package org.bsc.rmi.proxy.socket.debug;
 
 import lombok.EqualsAndHashCode;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.server.RMIServerSocketFactory;
-import java.util.logging.Level;
 
-import static java.lang.String.format;
-
-@Log
+@Slf4j
 public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
 
     static class DebugOutputStream extends FilterOutputStream {
@@ -29,9 +26,7 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            if(log.isLoggable(Level.FINE)) {
-                log.fine( format("\n>\nwrite bytes( off:%d, len:%d )\n<", off, len));
-            }
+            log.debug( "\n>\nwrite bytes( off:{}, len:{} )\n<", off, len);
             super.write(b, off, len);
         }
     }
@@ -51,9 +46,7 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
         public int read(byte[] b, int off, int len) throws IOException {
             int result = super.read(b, off, len);
 
-            if(log.isLoggable(Level.FINE)) {
-                log.fine( format("\n>\nread bytes( off:%d, len:%d ) = %d\n<", off, len, result));
-            }
+            log.debug( "\n>\nread bytes( off:{}, len:{} ) = {}\n<", off, len, result);
 
             return result;
         }
@@ -62,16 +55,7 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
     @EqualsAndHashCode
     static class DebugSocket extends Socket {
 
-        /**
-         * Creates an unconnected socket, with the
-         * system-default type of SocketImpl.
-         *
-         * @revised 1.4
-         * @since JDK1.1
-         */
-        public DebugSocket() {
-            log.info( format("create rmi server socket ") );
-        }
+        public DebugSocket() {}
 
         @Override
         public InputStream getInputStream() throws IOException {
@@ -93,11 +77,11 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
         public DebugServerSocket(int port) throws IOException {
             super(port);
 
-            log.info( format("create rmi server socket factory - port:%d", port));
         }
 
         @Override
         public Socket accept() throws IOException {
+            log.debug( "create rmi server socket factory - port: {}", super.getLocalPort());
             final Socket result = new DebugSocket();
             implAccept(result);
             return result;
@@ -105,16 +89,6 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
 
     }
 
-    /**
-     * Create a server socket on the specified port (port 0 indicates
-     * an anonymous port).
-     *
-     * @param port the port number
-     * @return the server socket on the specified port
-     * @throws IOException if an I/O error occurs during server socket
-     *                     creation
-     * @since 1.2
-     */
     @Override
     public ServerSocket createServerSocket(int port) throws IOException {
         return new DebugServerSocket(port);

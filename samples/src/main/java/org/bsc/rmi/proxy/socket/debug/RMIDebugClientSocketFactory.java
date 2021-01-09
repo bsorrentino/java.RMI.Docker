@@ -1,19 +1,16 @@
-package org.bsc.rmi.proxy.socket.client;
+package org.bsc.rmi.proxy.socket.debug;
 
 import lombok.EqualsAndHashCode;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
-import java.util.logging.Level;
 
-import static java.lang.String.format;
-
-@Log
+@Slf4j
 public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
 
-    String formatPrintableBuffer( byte[] b, int off, int len ) {
+    private String formatPrintableBuffer( byte[] b, int off, int len ) {
         final StringBuilder sb = new StringBuilder();
         for( int i=off ; i < len ; ++i ) {
             if( Character.isAlphabetic((char)b[i]) ) {
@@ -42,9 +39,9 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
 
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
-            if(log.isLoggable(Level.FINE)) {
-                log.fine( format("\n>\nwrite bytes( off:%d, len:%d, b.length:%d )\n%s\n<",
-                            off, len, b.length, formatPrintableBuffer(b,off,len)));
+            if(log.isDebugEnabled()) {
+                log.debug("\n>\nwrite bytes( off:{}, len:{}, b.length:{} )\n{}\n<",
+                        off, len, b.length, formatPrintableBuffer(b, off, len));
             }
             super.write(b, off, len);
         }
@@ -65,9 +62,9 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
         public int read(byte[] b, int off, int len) throws IOException {
             int result = super.read(b, off, len);
 
-            if(log.isLoggable(Level.FINE)) {
-                log.fine( format("\n>\nread bytes( off:%d, len:%d ) = %d\n%s\n<",
-                        off, len, result, formatPrintableBuffer(b,off,result)));
+            if(log.isDebugEnabled()) {
+                log.debug("\n>\nread bytes( off:{}, len:{} ) = {}\n{}\n<",
+                        off, len, result, formatPrintableBuffer(b, off, result));
             }
 
             return result;
@@ -81,7 +78,7 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
         public DebugSocket(String host, int port) throws IOException {
             super(host, port);
 
-            log.info( format("create rmi client socket - host:%s port:%d", host, port));
+            log.debug( "create rmi client socket - host:{} port:{}", host, port);
         }
 
         @Override

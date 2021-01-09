@@ -2,7 +2,7 @@ package org.bsc.rmi.sample;
 
 import lombok.NonNull;
 import lombok.extern.java.Log;
-import org.bsc.rmi.proxy.socket.client.RMIDebugClientSocketFactory;
+import org.bsc.rmi.proxy.socket.debug.RMIDebugClientSocketFactory;
 
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;

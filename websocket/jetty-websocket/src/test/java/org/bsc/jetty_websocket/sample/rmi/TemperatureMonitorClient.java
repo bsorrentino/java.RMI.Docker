@@ -3,6 +3,7 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.RMIClientWebsocketFactory;
+import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcher;
 import org.bsc.rmi.sample.TemperatureMonitor;
 
@@ -44,6 +45,9 @@ public class TemperatureMonitorClient
     public static void main(String[] args)
     {
         try {
+
+            RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
+
             // Lookup for the service
             //final TemperatureServer lRemoteDispatcher = lookupByUrl(52369, RMIClientSocketFactoryEnum.DEFAULT);
             final TemperatureDispatcher lRemoteDispatcher =

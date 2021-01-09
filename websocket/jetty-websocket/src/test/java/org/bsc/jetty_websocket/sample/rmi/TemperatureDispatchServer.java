@@ -3,6 +3,7 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.RMIWebsocketServerProxy;
+import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcherImpl;
 
 import java.net.InetAddress;
@@ -10,6 +11,7 @@ import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMISocketFactory;
 
 import static java.lang.String.format;
 
@@ -33,6 +35,8 @@ public class TemperatureDispatchServer
     {
         try
         {
+            RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
+
             startWebSocketServer();
 
             final TemperatureDispatcherImpl lServer = new TemperatureDispatcherImpl();
