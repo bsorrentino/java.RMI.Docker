@@ -16,10 +16,6 @@ public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
         this.websocket_port = websocket_port;
     }
 
-    public int getWebsocketPort() {
-        return websocket_port;
-    }
-
     @Override
     public Socket createSocket(String host, int rmi_port) throws IOException {
         try {

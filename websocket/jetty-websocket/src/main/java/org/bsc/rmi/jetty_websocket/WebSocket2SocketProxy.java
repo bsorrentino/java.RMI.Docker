@@ -223,7 +223,6 @@ public class WebSocket2SocketProxy extends Socket {
 
     final RMIWebSocketClientListener listener;
     final WebSocketClient client = new WebSocketClient();
-    final ClientUpgradeRequest request = new ClientUpgradeRequest();
 
     public WebSocket2SocketProxy(@NonNull String host, int websocket_port, @NonNull String websocket_path, int rmi_port) throws Exception {
         super(host, websocket_port);
@@ -240,19 +239,12 @@ public class WebSocket2SocketProxy extends Socket {
         final java.net.URI uri =
                 java.net.URI.create(format("ws://%s:%d/%s", host, websocket_port, websocket_path));
 
+        final ClientUpgradeRequest request = new ClientUpgradeRequest();
         request.setHeader("rmi_port", String.valueOf(rmi_port));
 
         final Future<Session> sessionFuture = client.connect(listener,uri, request);
 
         sessionFuture.get();
-    }
-
-    public void setRMIPort( int rmi_port ) {
-        request.setHeader("rmi_port", String.valueOf(rmi_port));
-    }
-
-    public int getRMIPort() {
-       return  request.getHeaderInt("rmi_port");
     }
 
     @Override

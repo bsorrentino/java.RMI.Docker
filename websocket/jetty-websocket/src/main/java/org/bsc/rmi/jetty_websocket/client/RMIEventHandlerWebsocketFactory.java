@@ -4,14 +4,12 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.WebSocket2SocketProxy;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.server.RMIServerSocketFactory;
-import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
+import static java.lang.String.format;
 
 /**
  * RMIServerSocketFactory invoked on the client to handle event from the server
@@ -89,17 +87,10 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
         }
 
-        public void setRMIPort( int rmi_port ) {
-            websocketClientProxy.setRMIPort( rmi_port );
-        }
-
         @Override
         public Socket accept() throws IOException {
 
-            final int rmi_port = websocketClientProxy.getRMIPort();
-            final String host = super.getInetAddress().getHostName();
-
-            log.debug( "accept  Event Handler Server Socket - host:{} rmi port: {}", host, rmi_port);
+            log.debug( "accept  Event Handler Server Socket");
 
             return websocketClientProxy;
         }
@@ -108,15 +99,20 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
     final EventHandlerServerSocket serverSocket;
 
-    public RMIEventHandlerWebsocketFactory(int websocket_port) throws IOException {
-        serverSocket = new EventHandlerServerSocket(websocket_port, 0);
+    public RMIEventHandlerWebsocketFactory(int websocket_port, int rmi_port) throws IOException {
+
+        serverSocket = new EventHandlerServerSocket(websocket_port, rmi_port);
     }
 
     @Override
     public ServerSocket createServerSocket(int rmi_port) throws IOException {
-        return ofNullable(serverSocket).map( result -> {
-            result.setRMIPort(rmi_port);
-            return result;
-        }).orElseThrow( () -> new IllegalStateException( "Event Handler Server Socket is null"));
+        int predefined_rmi_port = serverSocket.websocketClientProxy.getLocalPort();
+        if(  predefined_rmi_port != rmi_port ) {
+            final String msg = format( "provided rmi port:%d is different from predefined rmi port:%d for events", rmi_port, predefined_rmi_port );
+            log.error( msg );
+            throw new IllegalArgumentException( msg );
+        }
+        return serverSocket;
+
     }
 }

@@ -13,7 +13,7 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
 
     public RMIWebsocketFactoryClient(int websocket_port) throws IOException {
         client = new RMIClientWebsocketFactory(websocket_port);
-        server = new RMIEventHandlerWebsocketFactory(websocket_port);
+        server = new RMIEventHandlerWebsocketFactory(websocket_port, 5000);
     }
 
     @Override

@@ -6,13 +6,14 @@ import java.net.Socket;
 import java.rmi.server.RMISocketFactory;
 
 public class RMIWebsocketFactoryServer extends RMISocketFactory {
+
     @Override
     public Socket createSocket(String host, int port) throws IOException {
-        return null;
+        return getDefaultSocketFactory().createSocket(host,port);
     }
 
     @Override
     public ServerSocket createServerSocket(int port) throws IOException {
-        return null;
+        return getDefaultSocketFactory().createServerSocket(port);
     }
 }

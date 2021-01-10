@@ -32,9 +32,11 @@ public class RMIWebsocketServerProxy  {
 
 
         public RMISession(@NonNull WebSocketSession session, int rmi_port) throws Exception {
-            super("RMIConnProxy");
+            super("RMISession");
             this.session = session;
-            rmi_socket = new Socket(session.getLocalAddress().getHostName(), rmi_port);
+            final String host = session.getLocalAddress().getHostString();
+            log.debug( "creating rmi proxy socket host:{} rmi_port:{}", host, rmi_port);
+            rmi_socket = new Socket(host, rmi_port);
 
             outToClient = rmi_socket.getOutputStream();
 
@@ -134,6 +136,7 @@ public class RMIWebsocketServerProxy  {
 
             asWebSocketSession( sess ).ifPresent( wsess -> {
                 try {
+
 
                    //  Attach RMISession to WS Session
                     final RMISession connProxy = new RMISession(wsess, rmi_port);
