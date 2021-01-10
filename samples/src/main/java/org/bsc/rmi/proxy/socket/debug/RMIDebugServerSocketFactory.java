@@ -4,8 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.rmi.server.RMIServerSocketFactory;
 
 @Slf4j
@@ -55,7 +54,29 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
     @EqualsAndHashCode
     static class DebugSocket extends Socket {
 
+        protected DebugSocket(SocketImpl impl) throws SocketException {
+            super(impl);
+        }
+
         public DebugSocket() {}
+
+        @Override
+        public void connect(SocketAddress endpoint) throws IOException {
+            log.debug( "connect( endpoint:{} )", endpoint);
+            super.connect(endpoint);
+        }
+
+        @Override
+        public void connect(SocketAddress endpoint, int timeout) throws IOException {
+            log.debug( "connect( endpoint:{}, timeout:{} )", endpoint, timeout);
+            super.connect(endpoint, timeout);
+        }
+
+        @Override
+        public void bind(SocketAddress bindpoint) throws IOException {
+            log.debug( "bind( bindpoint:{} )", bindpoint);
+            super.bind(bindpoint);
+        }
 
         @Override
         public InputStream getInputStream() throws IOException {
@@ -67,7 +88,44 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
             return new DebugOutputStream(super.getOutputStream());
         }
 
+        @Override
+        public synchronized void close() throws IOException {
+            log.debug( "close()");
+            super.close();
+        }
 
+        @Override
+        public void shutdownInput() throws IOException {
+            log.debug( "shutdownInput()");
+            super.shutdownInput();
+        }
+
+        @Override
+        public void shutdownOutput() throws IOException {
+            log.debug( "shutdownOutput()");
+            super.shutdownOutput();
+        }
+
+        @Override
+        public boolean isConnected() {
+            boolean v = super.isConnected();
+            log.debug( "isConnected()={}", v);
+            return v;
+        }
+
+        @Override
+        public boolean isBound() {
+            boolean v = super.isBound();
+            log.debug( "isBound()={}", v);
+            return v;
+        }
+
+        @Override
+        public boolean isClosed() {
+            boolean v = super.isClosed();
+            log.debug( "isClosed()={}", v);
+            return v;
+        }
     }
 
     @EqualsAndHashCode
