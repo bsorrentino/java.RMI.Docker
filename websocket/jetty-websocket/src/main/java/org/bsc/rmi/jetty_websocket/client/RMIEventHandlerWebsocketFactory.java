@@ -11,6 +11,7 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.util.Optional;
 
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
 /**
  * RMIServerSocketFactory invoked on the client to handle event from the server
@@ -105,22 +106,15 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
     }
 
-    Optional<EventHandlerServerSocket> serverSocket;
+    final EventHandlerServerSocket serverSocket;
 
-    public RMIEventHandlerWebsocketFactory(int websocket_port) {
-        try {
-            serverSocket = Optional.of(new EventHandlerServerSocket(websocket_port, 0));
-        } catch (IOException e) {
-            log.error( "error creating Event Handler Server Socket", e );
-            serverSocket = empty();
-        }
-
+    public RMIEventHandlerWebsocketFactory(int websocket_port) throws IOException {
+        serverSocket = new EventHandlerServerSocket(websocket_port, 0);
     }
 
     @Override
     public ServerSocket createServerSocket(int rmi_port) throws IOException {
-
-        return serverSocket.map( result -> {
+        return ofNullable(serverSocket).map( result -> {
             result.setRMIPort(rmi_port);
             return result;
         }).orElseThrow( () -> new IllegalStateException( "Event Handler Server Socket is null"));

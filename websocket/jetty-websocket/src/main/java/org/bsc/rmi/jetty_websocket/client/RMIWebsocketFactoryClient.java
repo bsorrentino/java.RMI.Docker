@@ -1,7 +1,4 @@
-package org.bsc.rmi.jetty_websocket;
-
-import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebsocketFactory;
+package org.bsc.rmi.jetty_websocket.client;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,7 +11,7 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
     final RMIClientWebsocketFactory client;
     final RMIServerSocketFactory server;
 
-    public RMIWebsocketFactoryClient(int websocket_port) {
+    public RMIWebsocketFactoryClient(int websocket_port) throws IOException {
         client = new RMIClientWebsocketFactory(websocket_port);
         server = new RMIEventHandlerWebsocketFactory(websocket_port);
     }

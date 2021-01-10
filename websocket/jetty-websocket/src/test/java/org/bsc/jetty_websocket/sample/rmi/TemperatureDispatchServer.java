@@ -2,7 +2,7 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.RMIWebsocketServerProxy;
+import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcherImpl;
 
