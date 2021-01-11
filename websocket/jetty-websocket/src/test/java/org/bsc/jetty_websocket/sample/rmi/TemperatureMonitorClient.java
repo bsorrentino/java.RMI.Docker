@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
 import org.bsc.rmi.jetty_websocket.client.RMIWebsocketFactoryClient;
 import org.bsc.rmi.jetty_websocket.server.RMIWebsocketFactoryServer;
+import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugClientSocketFactory;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcher;
@@ -95,10 +96,16 @@ public class TemperatureMonitorClient implements Constants
     public static void main(String[] args)
     {
         try {
+
             final String host = InetAddress.getLocalHost().getHostAddress();
 
+            final RMIClientWebsocketFactory websocket_client =
+                new RMIClientWebsocketFactory(WEBSOCKET_PORT);
+
+            
             final RMISocketFactory factory =
                 RMIWebsocketFactoryClient.builder()
+                    .clientSocketFactory( websocket_client )
                     .debug( true )
                     .build();
 

@@ -99,8 +99,8 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
     final EventHandlerServerSocket serverSocket;
 
-    public RMIEventHandlerWebsocketFactory(@NonNull String host, int websocket_port, int rmi_port) throws IOException {
-        serverSocket = new EventHandlerServerSocket(host, websocket_port, rmi_port);
+    public RMIEventHandlerWebsocketFactory(@NonNull String host, int websocket_port, int rmi_event_port) throws IOException {
+        serverSocket = new EventHandlerServerSocket(host, websocket_port, rmi_event_port);
     }
 
     @Override
