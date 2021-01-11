@@ -26,11 +26,8 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
 
     class DebugOutputStream extends FilterOutputStream {
 
-        final int port;
-
-        public DebugOutputStream(OutputStream out, int port) {
+        public DebugOutputStream(OutputStream out) {
             super(out);
-            this.port = port;
         }
 
 //        @Override
@@ -55,10 +52,8 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
 
     class DebugInputStream extends FilterInputStream {
 
-        final int port;
-        public DebugInputStream(InputStream in, int port) {
+        public DebugInputStream(InputStream in) {
             super(in);
-            this.port = port;
         }
 
         @Override
@@ -84,28 +79,29 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
     @EqualsAndHashCode
     class DebugSocket extends Socket {
 
-
         public DebugSocket(String host, int port) throws IOException {
             super(host, port);
-
             log.debug( "create rmi client socket - host:{} port:{}", host, port);
         }
 
         @Override
         public InputStream getInputStream() throws IOException {
-            return new DebugInputStream(super.getInputStream(), getLocalPort());
+            return new DebugInputStream(super.getInputStream());
         }
 
         @Override
         public OutputStream getOutputStream() throws IOException {
-            return new DebugOutputStream(super.getOutputStream(), getLocalPort());
+            return new DebugOutputStream(super.getOutputStream());
         }
 
 
     }
 
+    int port;
+
     @Override
     public Socket createSocket(String host, int port) throws IOException {
+        this.port = port;
         return new DebugSocket( host, port );
     }
 }

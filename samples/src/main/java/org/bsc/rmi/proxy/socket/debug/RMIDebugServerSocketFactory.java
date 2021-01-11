@@ -10,12 +10,10 @@ import java.rmi.server.RMIServerSocketFactory;
 @Slf4j
 public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
 
-    static class DebugOutputStream extends FilterOutputStream {
-        final int port;
+    class DebugOutputStream extends FilterOutputStream {
 
-        public DebugOutputStream(OutputStream out, int port) {
+        public DebugOutputStream(OutputStream out) {
             super(out);
-            this.port = port;
         }
 
 //        @Override
@@ -33,14 +31,10 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
         }
     }
 
-    static class DebugInputStream extends FilterInputStream {
+    class DebugInputStream extends FilterInputStream {
 
-        final int port;
-
-        public DebugInputStream(InputStream in, int port) {
+        public DebugInputStream(InputStream in) {
             super(in);
-            this.port = port;
-
         }
 
         @Override
@@ -59,13 +53,15 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
     }
 
     @EqualsAndHashCode
-    static class DebugSocket extends Socket {
+    class DebugSocket extends Socket {
 
         protected DebugSocket(SocketImpl impl) throws SocketException {
             super(impl);
+            port = -1;
         }
 
-        public DebugSocket() {}
+        public DebugSocket()  {
+        }
 
         @Override
         public void connect(SocketAddress endpoint) throws IOException {
@@ -87,12 +83,12 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
 
         @Override
         public InputStream getInputStream() throws IOException {
-            return new DebugInputStream(super.getInputStream(), getLocalPort());
+            return new DebugInputStream(super.getInputStream());
         }
 
         @Override
         public OutputStream getOutputStream() throws IOException {
-            return new DebugOutputStream(super.getOutputStream(), getLocalPort());
+            return new DebugOutputStream(super.getOutputStream());
         }
 
         @Override
@@ -104,38 +100,36 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
         @Override
         public boolean isConnected() {
             boolean v = super.isConnected();
-            log.debug( "isConnected()={}", v);
+            //log.debug( "isConnected()={}", v);
             return v;
         }
 
         @Override
         public boolean isBound() {
             boolean v = super.isBound();
-            log.debug( "isBound()={}", v);
+            //log.debug( "isBound()={}", v);
             return v;
         }
 
         @Override
         public boolean isClosed() {
             boolean v = super.isClosed();
-            log.debug( "isClosed()={}", v);
+            //log.debug( "isClosed()={}", v);
             return v;
         }
     }
 
     @EqualsAndHashCode
-    static class DebugServerSocket extends ServerSocket {
+    class DebugServerSocket extends ServerSocket {
 
-
-        public DebugServerSocket(int port) throws IOException {
+        public DebugServerSocket() throws IOException {
             super(port);
-            log.debug( "create rmi server socket - port: {}", super.getLocalPort());
-
+            log.debug( "create rmi server socket - port: {}", port);
         }
 
         @Override
         public Socket accept() throws IOException {
-            log.debug( "accept rmi server socket - port: {}", super.getLocalPort());
+            log.debug( "accept rmi server socket - port: {}", port);
             final Socket result = new DebugSocket();
             implAccept(result);
             return result;
@@ -143,8 +137,11 @@ public class RMIDebugServerSocketFactory implements RMIServerSocketFactory {
 
     }
 
+    int port;
+
     @Override
     public ServerSocket createServerSocket(int port) throws IOException {
-        return new DebugServerSocket(port);
+        this.port = port;
+        return new DebugServerSocket();
     }
 }
