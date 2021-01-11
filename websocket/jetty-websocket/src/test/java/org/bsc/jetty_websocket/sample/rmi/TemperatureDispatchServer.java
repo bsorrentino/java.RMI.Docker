@@ -20,39 +20,17 @@ import static java.lang.String.format;
 @Slf4j
 public class TemperatureDispatchServer implements Constants
 {
-    public static void rebindByUrl(Remote obj ) throws Exception {
-        final String url = format( "rmi://%s:%d/Hello",InetAddress.getLocalHost().getHostAddress(), RMI_PORT);
-        Naming.rebind(url, obj);
-    }
-
-    /**
-     *
-     * @throws Exception
-     */
-    public static void setupWebsocket() throws Exception
-    {
-        final RMIWebsocketServerProxy wsserver = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
-        wsserver.start();
-
-        final RMISocketFactory factory = new RMIWebsocketFactoryServer(wsserver.eventDispatcherlistener);
-        RMISocketFactory.setSocketFactory( factory );
-    }
-
-    /**
-     *
-     * @throws Exception
-     */
-    public static void setupDebuggingRMI() throws Exception {
-
-        RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
-    }
 
     public static void main(String[] args)
     {
         try
         {
-            //setupWebsocket();
-            setupDebuggingRMI();
+            final RMISocketFactory factory =
+                RMIWebsocketFactoryServer.builder()
+                    .debug(true)
+                    .build();
+
+            RMISocketFactory.setSocketFactory( factory );
 
             final TemperatureDispatcherImpl lServer = new TemperatureDispatcherImpl(RMI_PORT);
             // Binding the remote object (stub) in the registry
