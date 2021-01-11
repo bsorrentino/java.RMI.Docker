@@ -23,10 +23,8 @@ public class TemperatureDispatchServer implements Constants
         {
             final RMIWebsocketServerProxy wsServer = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
 
-            final WebSocketProxyListener eventListener = new WebSocketProxyListener();
-
             final RMIEventDispatcherWebsocketFactory wsEventDispatcher =
-                    new RMIEventDispatcherWebsocketFactory(eventListener);
+                    new RMIEventDispatcherWebsocketFactory(wsServer.eventDispatcherlistener);
 
             wsServer.start();
 
