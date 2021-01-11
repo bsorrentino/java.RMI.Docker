@@ -25,8 +25,12 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
     }
 
     class DebugOutputStream extends FilterOutputStream {
-        public DebugOutputStream(OutputStream out) {
+
+        final int port;
+
+        public DebugOutputStream(OutputStream out, int port) {
             super(out);
+            this.port = port;
         }
 
 //        @Override
@@ -40,8 +44,10 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
         @Override
         public void write(byte[] b, int off, int len) throws IOException {
             if(log.isDebugEnabled()) {
-                log.debug("\n>\nwrite bytes( off:{}, len:{}, b.length:{} )\n{}\n<",
-                        off, len, b.length, formatPrintableBuffer(b, off, len));
+                log.debug("\n>\nwrite to port:{} bytes( off:{}, len:{}, b.length:{} )\n{}\n<",
+                        port,
+                        off, len, b.length,
+                        formatPrintableBuffer(b, off, len));
             }
             super.write(b, off, len);
         }
@@ -49,8 +55,10 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
 
     class DebugInputStream extends FilterInputStream {
 
-        public DebugInputStream(InputStream in) {
+        final int port;
+        public DebugInputStream(InputStream in, int port) {
             super(in);
+            this.port = port;
         }
 
         @Override
@@ -63,8 +71,10 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
             int result = super.read(b, off, len);
 
             if(log.isDebugEnabled()) {
-                log.debug("\n>\nread bytes( off:{}, len:{} ) = {}\n{}\n<",
-                        off, len, result, formatPrintableBuffer(b, off, result));
+                log.debug("\n>\nread from port:{} bytes( off:{}, len:{} ) = {}\n{}\n<",
+                        port,
+                        off, len, result,
+                        formatPrintableBuffer(b, off, result));
             }
 
             return result;
@@ -83,12 +93,12 @@ public class RMIDebugClientSocketFactory implements RMIClientSocketFactory {
 
         @Override
         public InputStream getInputStream() throws IOException {
-            return new DebugInputStream(super.getInputStream());
+            return new DebugInputStream(super.getInputStream(), getLocalPort());
         }
 
         @Override
         public OutputStream getOutputStream() throws IOException {
-            return new DebugOutputStream(super.getOutputStream());
+            return new DebugOutputStream(super.getOutputStream(), getLocalPort());
         }
 
 

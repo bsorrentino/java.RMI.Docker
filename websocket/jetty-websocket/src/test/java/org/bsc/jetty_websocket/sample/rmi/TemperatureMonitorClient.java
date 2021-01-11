@@ -4,6 +4,8 @@ package org.bsc.jetty_websocket.sample.rmi;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
 import org.bsc.rmi.jetty_websocket.client.RMIWebsocketFactoryClient;
+import org.bsc.rmi.proxy.socket.debug.RMIDebugClientSocketFactory;
+import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcher;
 import org.bsc.rmi.sample.TemperatureMonitor;
 
@@ -23,7 +25,9 @@ public class TemperatureMonitorClient implements Constants
     enum RMIClientSocketFactoryEnum {
 
         DEFAULT( RMISocketFactory.getDefaultSocketFactory() ),
-        WEBSOCKET( new RMIClientWebsocketFactory(WEBSOCKET_PORT));
+        DEBUG( new RMIDebugClientSocketFactory() ),
+        WEBSOCKET( new RMIClientWebsocketFactory(WEBSOCKET_PORT))
+        ;
 
         RMIClientSocketFactory factory;
 
@@ -32,6 +36,13 @@ public class TemperatureMonitorClient implements Constants
         }
     }
 
+    /**
+     *
+     * @param rmi_port
+     * @param s
+     * @return
+     * @throws Exception
+     */
     public static TemperatureDispatcher lookupByUrl(int rmi_port, RMIClientSocketFactoryEnum s ) throws Exception {
         final String host = InetAddress.getLocalHost().getHostAddress();
 
@@ -45,28 +56,47 @@ public class TemperatureMonitorClient implements Constants
         return (TemperatureDispatcher) lRemote;
     }
 
-    static <T extends UnicastRemoteObject> T exportEventObject( T object ) throws RemoteException {
-        return (T)UnicastRemoteObject.exportObject(object,RMI_EVENT_PORT);
+    /**
+     *
+     * @throws Exception
+     */
+    public static RMIClientSocketFactoryEnum setupWebsocket() throws Exception {
+        RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryClient(WEBSOCKET_PORT) );
+
+        return RMIClientSocketFactoryEnum.WEBSOCKET;
     }
 
+    /**
+     *
+     * @throws Exception
+     */
+    public static RMIClientSocketFactoryEnum setupDebuggingRMI() throws Exception {
+        RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
+
+        return RMIClientSocketFactoryEnum.DEBUG;
+
+    }
+
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args)
     {
         try {
 
-            //RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
-            RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryClient(WEBSOCKET_PORT) );
+            //setupWebsocket();
+            RMIClientSocketFactoryEnum sfType = setupDebuggingRMI();
 
             // Lookup for the service
-            //final TemperatureServer lRemoteDispatcher = lookupByUrl(52369, RMIClientSocketFactoryEnum.DEFAULT);
-            final TemperatureDispatcher lRemoteDispatcher =
-                    lookupByUrl(RMI_PORT, RMIClientSocketFactoryEnum.WEBSOCKET);
+            final TemperatureDispatcher lRemoteDispatcher = lookupByUrl(RMI_PORT, sfType);
 
             // Display the current temperature
             log.info("Origin Temperature {}", lRemoteDispatcher.getTemperature());
 
             // Create a temperature monitor and register it as a Listener
             //final TemperatureMonitor lTemperatureMonitor = new TemperatureMonitor();
-            final TemperatureMonitor lTemperatureMonitor = exportEventObject(new TemperatureMonitor());
+            final TemperatureMonitor lTemperatureMonitor = new TemperatureMonitor(RMI_EVENT_PORT);
             lRemoteDispatcher.addTemperatureListener(lTemperatureMonitor);
 
         }

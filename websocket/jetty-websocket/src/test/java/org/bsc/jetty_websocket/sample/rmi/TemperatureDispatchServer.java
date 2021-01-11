@@ -7,6 +7,7 @@ import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcherImpl;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.rmi.Naming;
 import java.rmi.Remote;
@@ -24,14 +25,34 @@ public class TemperatureDispatchServer implements Constants
         Naming.rebind(url, obj);
     }
 
+
+    /**
+     *
+     * @throws Exception
+     */
+    public static void setupWebsocket() throws Exception
+    {
+        final RMIWebsocketServerProxy wsserver = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
+        wsserver.start();
+
+        RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryServer(wsserver.eventDispatcherlistener) );
+    }
+
+    /**
+     *
+     * @throws Exception
+     */
+    public static void setupDebuggingRMI() throws Exception {
+
+        RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
+    }
+
     public static void main(String[] args)
     {
         try
         {
-            final RMIWebsocketServerProxy wsserver = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
-            wsserver.start();
-
-            RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryServer(wsserver.eventDispatcherlistener) );
+            //setupWebsocket();
+            setupDebuggingRMI();
 
             final TemperatureDispatcherImpl lServer = new TemperatureDispatcherImpl();
             // Binding the remote object (stub) in the registry
