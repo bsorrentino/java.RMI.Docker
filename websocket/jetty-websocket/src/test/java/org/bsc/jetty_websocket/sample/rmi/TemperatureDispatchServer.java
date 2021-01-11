@@ -24,18 +24,14 @@ public class TemperatureDispatchServer implements Constants
         Naming.rebind(url, obj);
     }
 
-    private static void startWebSocketServer() throws Exception {
-        final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
-        s.start();
-    }
-
     public static void main(String[] args)
     {
         try
         {
-            RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryServer() );
+            final RMIWebsocketServerProxy wsserver = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
+            wsserver.start();
 
-            startWebSocketServer();
+            RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryServer(wsserver.eventDispatcherlistener) );
 
             final TemperatureDispatcherImpl lServer = new TemperatureDispatcherImpl();
             // Binding the remote object (stub) in the registry

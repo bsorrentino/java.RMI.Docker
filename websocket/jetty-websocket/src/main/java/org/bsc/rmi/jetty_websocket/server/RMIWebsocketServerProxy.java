@@ -2,6 +2,7 @@ package org.bsc.rmi.jetty_websocket.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.jetty_websocket.WebSocketProxyListener;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -203,6 +204,7 @@ public class RMIWebsocketServerProxy  {
     }
 
     final Server server = new Server();
+    public final WebSocketProxyListener eventDispatcherlistener = new WebSocketProxyListener();
 
     public RMIWebsocketServerProxy(int websocket_port) throws Exception {
 
@@ -226,7 +228,7 @@ public class RMIWebsocketServerProxy  {
                     final Listener listener = new Listener();
                     // Add websockets
                     nativeWebSocketConfiguration.addMapping("/rmi/pull", (req,res) -> listener);
-                    nativeWebSocketConfiguration.addMapping("/rmi/push", (req,res) -> listener);
+                    nativeWebSocketConfiguration.addMapping("/rmi/push", (req,res) -> eventDispatcherlistener);
                 });
 
         // Add generic filter that will accept WebSocket upgrade.

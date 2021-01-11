@@ -1,6 +1,7 @@
 package org.bsc.rmi.jetty_websocket.client;
 
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.WebSocket2SocketProxy;
 
@@ -62,11 +63,10 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
         final WebSocket2SocketProxy websocketClientProxy;
 
-        public EventHandlerServerSocket(int websocket_port, int rmi_port) throws IOException {
+        public EventHandlerServerSocket(@NonNull String host, int websocket_port, int rmi_port) throws IOException {
             super(rmi_port);
 
             try {
-                final String host = super.getInetAddress().getHostName();
                 final String websocket_path = "rmi/push";
 
                 log.debug( "create rmi Event Handler Server Socket - host:{} rmi port: {} websocket port:{} websocket path:{}",
@@ -99,9 +99,9 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
     final EventHandlerServerSocket serverSocket;
 
-    public RMIEventHandlerWebsocketFactory(int websocket_port, int rmi_port) throws IOException {
+    public RMIEventHandlerWebsocketFactory(@NonNull String host, int websocket_port, int rmi_port) throws IOException {
 
-        serverSocket = new EventHandlerServerSocket(websocket_port, rmi_port);
+        serverSocket = new EventHandlerServerSocket(host, websocket_port, rmi_port);
     }
 
     @Override

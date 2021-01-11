@@ -10,7 +10,7 @@ import java.rmi.server.RMIClientSocketFactory;
 @Slf4j
 public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
 
-    final int websocket_port;
+    public final int websocket_port;
 
     public RMIClientWebsocketFactory(int websocket_port) {
         this.websocket_port = websocket_port;

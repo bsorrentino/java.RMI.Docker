@@ -8,16 +8,17 @@ import java.rmi.server.RMISocketFactory;
 
 public class RMIWebsocketFactoryClient extends RMISocketFactory {
 
-    final RMIClientWebsocketFactory client;
-    final RMIServerSocketFactory server;
+    private final RMIClientWebsocketFactory client;
+    private RMIServerSocketFactory server;
 
     public RMIWebsocketFactoryClient(int websocket_port) throws IOException {
         client = new RMIClientWebsocketFactory(websocket_port);
-        server = new RMIEventHandlerWebsocketFactory(websocket_port, 5000);
+        //server = new RMIEventHandlerWebsocketFactory(websocket_port, 5000);
     }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException {
+        server = new RMIEventHandlerWebsocketFactory( host, client.websocket_port, 5000);
         return client.createSocket(host, port);
     }
 
