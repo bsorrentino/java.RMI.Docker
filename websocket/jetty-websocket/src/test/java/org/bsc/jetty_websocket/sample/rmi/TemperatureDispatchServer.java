@@ -54,7 +54,7 @@ public class TemperatureDispatchServer implements Constants
             //setupWebsocket();
             setupDebuggingRMI();
 
-            final TemperatureDispatcherImpl lServer = new TemperatureDispatcherImpl();
+            final TemperatureDispatcherImpl lServer = new TemperatureDispatcherImpl(RMI_PORT);
             // Binding the remote object (stub) in the registry
             final Registry reg = LocateRegistry.createRegistry(RMI_PORT);
 

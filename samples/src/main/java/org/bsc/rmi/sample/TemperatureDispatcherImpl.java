@@ -13,12 +13,11 @@ public class TemperatureDispatcherImpl extends UnicastRemoteObject implements Te
 {
 
     private List<TemperatureListener> listeners = new ArrayList<>();
-    private volatile double temp;
+    private volatile double temp = 88.00;
 
-    public TemperatureDispatcherImpl() throws RemoteException
-    {
-        //Default temperature
-        temp = 88.00;
+    public TemperatureDispatcherImpl() throws RemoteException { }
+    public TemperatureDispatcherImpl( int port ) throws RemoteException  {
+        super( port );
     }
 
     @Override
