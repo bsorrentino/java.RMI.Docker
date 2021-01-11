@@ -1,9 +1,11 @@
 package org.bsc.jetty_websocket.sample.rmi;
 
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
 import org.bsc.rmi.jetty_websocket.client.RMIWebsocketFactoryClient;
+import org.bsc.rmi.jetty_websocket.server.RMIWebsocketFactoryServer;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugClientSocketFactory;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 import org.bsc.rmi.sample.TemperatureDispatcher;
@@ -39,17 +41,15 @@ public class TemperatureMonitorClient implements Constants
     /**
      *
      * @param rmi_port
-     * @param s
      * @return
      * @throws Exception
      */
-    public static TemperatureDispatcher lookupByUrl(int rmi_port, RMIClientSocketFactoryEnum s ) throws Exception {
-        final String host = InetAddress.getLocalHost().getHostAddress();
+    public static TemperatureDispatcher lookupByUrl(@NonNull  String host, int rmi_port /*, RMIClientSocketFactoryEnum s */ ) throws Exception {
 
         //final String url = format("rmi:/%s:%s/Hello", host, port );
         //final Remote lRemote = Naming.lookup(url);
 
-        final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, rmi_port, s.factory);
+        final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, rmi_port /*, s.factory*/);
 
         final Remote lRemote = reg.lookup("Hello");
 
@@ -61,7 +61,13 @@ public class TemperatureMonitorClient implements Constants
      * @throws Exception
      */
     public static RMIClientSocketFactoryEnum setupWebsocket() throws Exception {
-        RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryClient(WEBSOCKET_PORT) );
+
+        final RMISocketFactory factory =
+            RMIWebsocketFactoryClient.builder()
+                .clientSocketFactory( new RMIClientWebsocketFactory(WEBSOCKET_PORT) )
+                .build();
+
+        RMISocketFactory.setSocketFactory( factory );
 
         return RMIClientSocketFactoryEnum.WEBSOCKET;
     }
@@ -71,7 +77,12 @@ public class TemperatureMonitorClient implements Constants
      * @throws Exception
      */
     public static RMIClientSocketFactoryEnum setupDebuggingRMI() throws Exception {
-        RMISocketFactory.setSocketFactory( new RMIDebugSocketFactory() );
+        final RMISocketFactory factory =
+            RMIWebsocketFactoryClient.builder()
+                .debug( true )
+                .build();
+
+        RMISocketFactory.setSocketFactory( factory );
 
         return RMIClientSocketFactoryEnum.DEBUG;
 
@@ -84,12 +95,17 @@ public class TemperatureMonitorClient implements Constants
     public static void main(String[] args)
     {
         try {
+            final String host = InetAddress.getLocalHost().getHostAddress();
 
-            //setupWebsocket();
-            RMIClientSocketFactoryEnum sfType = setupDebuggingRMI();
+            final RMISocketFactory factory =
+                RMIWebsocketFactoryClient.builder()
+                    .debug( true )
+                    .build();
+
+            RMISocketFactory.setSocketFactory( factory );
 
             // Lookup for the service
-            final TemperatureDispatcher lRemoteDispatcher = lookupByUrl(RMI_PORT, sfType);
+            final TemperatureDispatcher lRemoteDispatcher = lookupByUrl(host, RMI_PORT);
 
             // Display the current temperature
             log.info("Origin Temperature {}", lRemoteDispatcher.getTemperature());

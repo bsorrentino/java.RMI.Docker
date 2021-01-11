@@ -25,7 +25,6 @@ public class TemperatureDispatchServer implements Constants
         Naming.rebind(url, obj);
     }
 
-
     /**
      *
      * @throws Exception
@@ -35,7 +34,8 @@ public class TemperatureDispatchServer implements Constants
         final RMIWebsocketServerProxy wsserver = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
         wsserver.start();
 
-        RMISocketFactory.setSocketFactory( new RMIWebsocketFactoryServer(wsserver.eventDispatcherlistener) );
+        final RMISocketFactory factory = new RMIWebsocketFactoryServer(wsserver.eventDispatcherlistener);
+        RMISocketFactory.setSocketFactory( factory );
     }
 
     /**
@@ -58,7 +58,7 @@ public class TemperatureDispatchServer implements Constants
             // Binding the remote object (stub) in the registry
             final Registry reg = LocateRegistry.createRegistry(RMI_PORT);
 
-            rebindByUrl(lServer);
+            reg.rebind("Hello",lServer);
 
             //Create the thread and change the temperature
             final Thread lThread = new Thread(lServer);

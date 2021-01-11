@@ -100,19 +100,11 @@ public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
     final EventHandlerServerSocket serverSocket;
 
     public RMIEventHandlerWebsocketFactory(@NonNull String host, int websocket_port, int rmi_port) throws IOException {
-
         serverSocket = new EventHandlerServerSocket(host, websocket_port, rmi_port);
     }
 
     @Override
     public ServerSocket createServerSocket(int rmi_port) throws IOException {
-        int predefined_rmi_port = serverSocket.websocketClientProxy.getLocalPort();
-        if(  predefined_rmi_port != rmi_port ) {
-            final String msg = format( "provided rmi port:%d is different from predefined rmi port:%d for events", rmi_port, predefined_rmi_port );
-            log.error( msg );
-            throw new IllegalArgumentException( msg );
-        }
         return serverSocket;
-
     }
 }
