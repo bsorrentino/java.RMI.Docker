@@ -43,7 +43,9 @@ public class TemperatureMonitorClient implements Constants
     public static void main(String[] args)
     {
         try {
-            final String host = (args.length < 1) ? InetAddress.getLocalHost().getHostAddress() : args[0];
+            final String host = (args.length < 1 || args[0].isEmpty()) ? InetAddress.getLocalHost().getHostAddress() : args[0];
+
+            log.info( "remote host: {}", host);
 
             final RMIClientWebSocketFactory wsClient =
                 new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
@@ -51,9 +53,6 @@ public class TemperatureMonitorClient implements Constants
             final RMIWebSocketEventHandlerProxy eventHandlerProxy =
                     new RMIWebSocketEventHandlerProxy(host, WEBSOCKET_PORT, RMI_EVENT_PORT);
 
-//            final RMIEventHandlerWebsocketFactory wsEventHandler =
-//                    new RMIEventHandlerWebsocketFactory( host, WEBSOCKET_PORT, RMI_EVENT_PORT);
-            
             final RMISocketFactory factory =
                 RMIWebSocketFactoryClient.builder()
                         .clientSocketFactory( wsClient )

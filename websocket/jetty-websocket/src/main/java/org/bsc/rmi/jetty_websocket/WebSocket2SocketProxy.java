@@ -24,7 +24,8 @@ public class WebSocket2SocketProxy extends Socket {
     final WebSocketClient client = new WebSocketClient();
 
     public WebSocket2SocketProxy(@NonNull String host, int websocket_port, @NonNull String websocket_path, int rmi_port) throws Exception {
-        super(host, websocket_port);
+        //super(host, websocket_port);
+        super( new FakeSocketImpl() );
 
         log.debug("create rmi client socket - host:{} rmi port:{} websocket port:{} websocket path:{}",
                 host,

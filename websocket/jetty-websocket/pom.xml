@@ -15,7 +15,7 @@
 
     <properties>
         <jetty.version>9.4.35.v20201120</jetty.version>
-        <remotehost>localhost</remotehost>
+        <remotehost></remotehost>
     </properties>
 
     <dependencies>
