@@ -3,8 +3,13 @@ package org.bsc.jetty_websocket.sample.rmi;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.client.RMIClientWebSocketFactory;
+import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebSocketFactory;
+import org.bsc.rmi.jetty_websocket.client.RMIWebSocketEventHandlerProxy;
+import org.bsc.rmi.jetty_websocket.client.RMIWebSocketFactoryClient;
 import org.bsc.rmi.sample.SampleRemote;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMISocketFactory;
@@ -14,9 +19,8 @@ import java.util.concurrent.CompletableFuture;
  * RMI client to invoke calls through the ServletHandler
  */
 @Slf4j
-public class SampleRemoteClient {
-    static final int RMI_PORT = 1099;
-    static final int WEBSOCKET_PORT = 8887;
+public class SampleRemoteClient implements Constants {
+
 
     /**
      * @param host
@@ -25,15 +29,10 @@ public class SampleRemoteClient {
      */
     private static CompletableFuture<Registry> getRMIRegistry(@NonNull String host, int port) {
 
-        final RMIClientSocketFactory clientSocketFactory[] = {
-            RMISocketFactory.getDefaultSocketFactory(),
-            new RMIClientWebSocketFactory(host, WEBSOCKET_PORT)
-        };
-
-        CompletableFuture<Registry> result = new CompletableFuture<>();
+        final CompletableFuture<Registry> result = new CompletableFuture<>();
 
         try {
-            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, clientSocketFactory[1]);
+            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port);
 
             result.complete(reg);
 
@@ -77,13 +76,24 @@ public class SampleRemoteClient {
     }
 
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
 
-        final String host = (args.length < 1) ? "localhost" : args[0];
+        final String host = (args.length < 1 || args[0].isEmpty()) ? InetAddress.getLocalHost().getHostAddress() : args[0];
 
         log.debug(System.getProperty("java.security.policy"));
 
         System.setSecurityManager(new SecurityManager());
+
+        final RMIClientWebSocketFactory wsClient =
+            new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
+
+        final RMISocketFactory factory =
+            RMIWebSocketFactoryClient.builder()
+                .clientSocketFactory( wsClient )
+                .debug( true )
+                .build();
+
+        RMISocketFactory.setSocketFactory( factory );
 
 
         getRMIRegistry(host, RMI_PORT)
