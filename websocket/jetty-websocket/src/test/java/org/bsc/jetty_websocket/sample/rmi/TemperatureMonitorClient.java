@@ -29,7 +29,6 @@ public class TemperatureMonitorClient implements Constants
 
         //final String url = format("rmi:/%s:%s/Hello", host, port );
         //final Remote lRemote = Naming.lookup(url);
-
         final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, rmi_port /*, s.factory*/);
 
         final Remote lRemote = reg.lookup("Hello");
@@ -44,11 +43,10 @@ public class TemperatureMonitorClient implements Constants
     public static void main(String[] args)
     {
         try {
-
-            final String host = InetAddress.getLocalHost().getHostAddress();
+            final String host = (args.length < 1) ? InetAddress.getLocalHost().getHostAddress() : args[0];
 
             final RMIClientWebSocketFactory wsClient =
-                new RMIClientWebSocketFactory(WEBSOCKET_PORT);
+                new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
 
             final RMIWebSocketEventHandlerProxy eventHandlerProxy =
                     new RMIWebSocketEventHandlerProxy(host, WEBSOCKET_PORT, RMI_EVENT_PORT);

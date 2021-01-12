@@ -15,6 +15,7 @@
 
     <properties>
         <jetty.version>9.4.35.v20201120</jetty.version>
+        <remotehost>localhost</remotehost>
     </properties>
 
     <dependencies>
@@ -85,6 +86,7 @@
                                 <argument>-classpath</argument>
                                 <classpath/>
                                 <argument>org.bsc.jetty_websocket.sample.rmi.TemperatureMonitorClient</argument>
+                                <argument>${remotehost}</argument>
                             </arguments>
                         </configuration>
                     </execution>

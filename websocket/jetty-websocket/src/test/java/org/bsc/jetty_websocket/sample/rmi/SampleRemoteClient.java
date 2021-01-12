@@ -27,7 +27,7 @@ public class SampleRemoteClient {
 
         final RMIClientSocketFactory clientSocketFactory[] = {
             RMISocketFactory.getDefaultSocketFactory(),
-            new RMIClientWebSocketFactory(WEBSOCKET_PORT)
+            new RMIClientWebSocketFactory(host, WEBSOCKET_PORT)
         };
 
         CompletableFuture<Registry> result = new CompletableFuture<>();
