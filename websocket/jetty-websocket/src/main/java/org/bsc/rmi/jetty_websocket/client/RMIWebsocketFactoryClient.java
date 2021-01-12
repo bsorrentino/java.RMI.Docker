@@ -29,7 +29,7 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
             this.client = Optional.of(client);
             return this;
         }
-        public Builder serverSocketFactory( @NonNull RMIEventHandlerWebsocketFactory2 server) {
+        public Builder serverSocketFactory( @NonNull RMIEventHandlerWebsocketFactory server) {
             if( this.server.isPresent() ) throw new IllegalStateException( "RMI Server Socket Factory already set!");
             this.server = Optional.of(server);
             return this;
@@ -39,11 +39,18 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
             return this;
         }
 
-       public  RMISocketFactory build() {
+        private RMIServerSocketFactory setServerDebug( RMIServerSocketFactory sf) {
+            if( debug && sf instanceof RMIEventHandlerWebsocketFactory ) {
+                ((RMIEventHandlerWebsocketFactory)sf).setDelegate( RMISocketFactory.getDefaultSocketFactory() );
+            }
+            return sf;
+        }
+
+        public  RMISocketFactory build() {
             RMISocketFactory def = (debug) ? new RMIDebugSocketFactory() : RMISocketFactory.getDefaultSocketFactory();
             return new RMIWebsocketFactoryClient(
                 client.orElse( def ),
-                server.orElse( def )
+                server.map( this::setServerDebug ).orElse( def )
             );
         }
     }

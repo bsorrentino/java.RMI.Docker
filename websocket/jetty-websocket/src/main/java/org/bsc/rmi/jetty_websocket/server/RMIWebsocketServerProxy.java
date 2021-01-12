@@ -2,7 +2,7 @@ package org.bsc.rmi.jetty_websocket.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.WebSocketAdapterEx;
+import org.bsc.rmi.jetty_websocket.RMIWebSocketServerAdapter;
 import org.bsc.rmi.jetty_websocket.WebSocketProxyListener;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -99,7 +99,7 @@ public class RMIWebsocketServerProxy  {
         }
     }
 
-    public static class Listener extends WebSocketAdapterEx {
+    public static class Listener extends RMIWebSocketServerAdapter {
 
         private Optional<RMISession> getRMIConnProxy(@NonNull Session sess ) {
             return getBean( sess, RMISession.class);

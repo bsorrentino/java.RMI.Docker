@@ -4,7 +4,7 @@ package org.bsc.jetty_websocket.sample.rmi;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebsocketFactory2;
+import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebsocketFactory;
 import org.bsc.rmi.jetty_websocket.client.RMIWebsocketEventHandlerProxy;
 import org.bsc.rmi.jetty_websocket.client.RMIWebsocketFactoryClient;
 import org.bsc.rmi.sample.TemperatureDispatcher;
@@ -59,7 +59,7 @@ public class TemperatureMonitorClient implements Constants
             final RMISocketFactory factory =
                 RMIWebsocketFactoryClient.builder()
                         .clientSocketFactory( wsClient )
-                        .serverSocketFactory( new RMIEventHandlerWebsocketFactory2(eventHandlerProxy) )
+                        .serverSocketFactory( new RMIEventHandlerWebsocketFactory(eventHandlerProxy) )
                         .debug( true )
                         .build();
 
