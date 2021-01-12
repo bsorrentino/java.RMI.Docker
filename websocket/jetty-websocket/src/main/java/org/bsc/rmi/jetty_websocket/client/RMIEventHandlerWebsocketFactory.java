@@ -10,8 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.server.RMIServerSocketFactory;
 
-import static java.lang.String.format;
-
 /**
  * RMIServerSocketFactory invoked on the client to handle event from the server
  *
@@ -19,44 +17,6 @@ import static java.lang.String.format;
 @Slf4j
 public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
-
-/*
-    @EqualsAndHashCode
-    static class EventHandlerSocket extends Socket {
-
-        public EventHandlerSocket() {}
-
-        @Override
-        public InputStream getInputStream() throws IOException {
-            return new DebugInputStream(super.getInputStream());
-        }
-
-        @Override
-        public OutputStream getOutputStream() throws IOException {
-            return new DebugOutputStream(super.getOutputStream());
-        }
-
-        @Override
-        public synchronized void close() throws IOException {
-            super.close();
-        }
-
-        @Override
-        public boolean isConnected() {
-            return super.isConnected();
-        }
-
-        @Override
-        public boolean isBound() {
-            return super.isBound();
-        }
-
-        @Override
-        public boolean isClosed() {
-            return super.isClosed();
-        }
-    }
-*/
 
     @EqualsAndHashCode
     class EventHandlerServerSocket extends ServerSocket {
