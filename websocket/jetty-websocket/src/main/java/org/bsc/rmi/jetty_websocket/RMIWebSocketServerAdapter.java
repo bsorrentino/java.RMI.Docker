@@ -2,7 +2,6 @@ package org.bsc.rmi.jetty_websocket;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -135,7 +134,7 @@ public class RMIWebSocketServerAdapter extends WebSocketAdapter {
 
 
                 //  Attach RMISession to WS Session
-                final RMIWebsocketServerProxy.RMISession connProxy = new RMIWebsocketServerProxy.RMISession(wsess, rmi_port);
+                final RMISession connProxy = new RMISession(wsess, rmi_port);
                 wsess.addBean( connProxy, false);
                 connProxy.start();
 
@@ -154,7 +153,7 @@ public class RMIWebSocketServerAdapter extends WebSocketAdapter {
             try {
 
                 //  Detach RMISession to WS Session
-                final RMIWebsocketServerProxy.RMISession proxy = wsess.getBean( RMIWebsocketServerProxy.RMISession.class);
+                final RMISession proxy = wsess.getBean( RMISession.class);
                 wsess.removeBean(proxy);
                 proxy.close();
 

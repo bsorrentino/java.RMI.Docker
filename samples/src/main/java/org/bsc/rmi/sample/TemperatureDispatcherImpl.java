@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -12,7 +13,7 @@ import java.util.Random;
 public class TemperatureDispatcherImpl extends UnicastRemoteObject implements TemperatureDispatcher, Runnable
 {
 
-    private List<TemperatureListener> listeners = new ArrayList<>();
+    private List<TemperatureListener> listeners = Collections.synchronizedList(new ArrayList<>());
     private volatile double temp = 88.00;
 
     public TemperatureDispatcherImpl() throws RemoteException { }
