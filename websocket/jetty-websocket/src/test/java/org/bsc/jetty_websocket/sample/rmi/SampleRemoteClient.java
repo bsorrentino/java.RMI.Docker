@@ -2,7 +2,7 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
+import org.bsc.rmi.jetty_websocket.client.RMIClientWebSocketFactory;
 import org.bsc.rmi.sample.SampleRemote;
 
 import java.rmi.registry.Registry;
@@ -27,7 +27,7 @@ public class SampleRemoteClient {
 
         final RMIClientSocketFactory clientSocketFactory[] = {
             RMISocketFactory.getDefaultSocketFactory(),
-            new RMIClientWebsocketFactory(WEBSOCKET_PORT)
+            new RMIClientWebSocketFactory(WEBSOCKET_PORT)
         };
 
         CompletableFuture<Registry> result = new CompletableFuture<>();

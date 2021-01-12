@@ -2,10 +2,9 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.WebSocketProxyListener;
-import org.bsc.rmi.jetty_websocket.server.RMIEventDispatcherWebsocketFactory;
-import org.bsc.rmi.jetty_websocket.server.RMIWebsocketFactoryServer;
-import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
+import org.bsc.rmi.jetty_websocket.server.RMIEventDispatcherWebSocketFactory;
+import org.bsc.rmi.jetty_websocket.server.RMIWebSocketFactoryServer;
+import org.bsc.rmi.jetty_websocket.server.RMIWebSocketServerProxy;
 import org.bsc.rmi.sample.TemperatureDispatcherImpl;
 
 import java.net.InetAddress;
@@ -21,17 +20,17 @@ public class TemperatureDispatchServer implements Constants
     {
         try
         {
-            final RMIWebsocketServerProxy wsServer = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
+            final RMIWebSocketServerProxy wsServer = new RMIWebSocketServerProxy(WEBSOCKET_PORT);
 
-            final RMIEventDispatcherWebsocketFactory wsEventDispatcher =
-                    new RMIEventDispatcherWebsocketFactory(wsServer.eventDispatcherlistener);
+            final RMIEventDispatcherWebSocketFactory wsEventDispatcher =
+                    new RMIEventDispatcherWebSocketFactory(wsServer.eventDispatcherlistener);
 
             wsServer.start();
 
             final String host = InetAddress.getLocalHost().getHostAddress();
 
             final RMISocketFactory factory =
-                RMIWebsocketFactoryServer.builder()
+                RMIWebSocketFactoryServer.builder()
                         .clientSocketFactory(wsEventDispatcher)
                         .debug(true)
                         .build();

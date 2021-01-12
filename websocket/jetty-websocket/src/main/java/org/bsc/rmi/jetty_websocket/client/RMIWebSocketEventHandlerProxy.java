@@ -3,26 +3,17 @@ package org.bsc.rmi.jetty_websocket.client;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.RMIWebSocketServerAdapter;
-import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.eclipse.jetty.websocket.common.WebSocketSession;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.concurrent.Future;
 
 import static java.lang.String.format;
 
 @Slf4j
-public class RMIWebsocketEventHandlerProxy {
+public class RMIWebSocketEventHandlerProxy {
 
     final WebSocketListener listener = new RMIWebSocketServerAdapter();
     final WebSocketClient client = new WebSocketClient();
@@ -30,7 +21,7 @@ public class RMIWebsocketEventHandlerProxy {
     final java.net.URI wsURI;
     final int rmi_port;
 
-    public RMIWebsocketEventHandlerProxy(@NonNull String host, int websocket_port, int rmi_port) {
+    public RMIWebSocketEventHandlerProxy(@NonNull String host, int websocket_port, int rmi_port) {
         this.rmi_port = rmi_port;
 
         final String websocket_path = "rmi/push";

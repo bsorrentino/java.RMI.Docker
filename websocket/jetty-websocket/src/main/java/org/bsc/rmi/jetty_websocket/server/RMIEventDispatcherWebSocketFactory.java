@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
 
-public class RMIEventDispatcherWebsocketFactory implements RMIClientSocketFactory {
+public class RMIEventDispatcherWebSocketFactory implements RMIClientSocketFactory {
 
     public final WebSocketProxyListener eventDispatcherlistener;
 
-    public RMIEventDispatcherWebsocketFactory(@NonNull WebSocketProxyListener eventDispatcherlistener) {
+    public RMIEventDispatcherWebSocketFactory(@NonNull WebSocketProxyListener eventDispatcherlistener) {
         this.eventDispatcherlistener = eventDispatcherlistener;
     }
 

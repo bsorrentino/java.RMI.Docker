@@ -2,7 +2,7 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
+import org.bsc.rmi.jetty_websocket.server.RMIWebSocketServerProxy;
 import org.bsc.rmi.sample.SampleRemote;
 
 import java.rmi.RemoteException;
@@ -77,7 +77,7 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
     private static CompletableFuture<Void> startWebSocketServer( Void param ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            final RMIWebsocketServerProxy s = new RMIWebsocketServerProxy(WEBSOCKET_PORT);
+            final RMIWebSocketServerProxy s = new RMIWebSocketServerProxy(WEBSOCKET_PORT);
             s.start();
 
             result.complete( null );

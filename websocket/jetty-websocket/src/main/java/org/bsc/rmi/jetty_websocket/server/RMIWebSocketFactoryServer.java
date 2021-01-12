@@ -2,9 +2,6 @@ package org.bsc.rmi.jetty_websocket.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.WebSocketProxyListener;
-import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIWebsocketFactoryClient;
 import org.bsc.rmi.proxy.socket.debug.RMIDebugSocketFactory;
 
 import java.io.IOException;
@@ -18,7 +15,7 @@ import java.util.Optional;
 import static java.util.Optional.empty;
 
 @Slf4j
-public class RMIWebsocketFactoryServer extends RMISocketFactory {
+public class RMIWebSocketFactoryServer extends RMISocketFactory {
 
     private final RMIClientSocketFactory client;
     private final RMIServerSocketFactory server;
@@ -29,7 +26,7 @@ public class RMIWebsocketFactoryServer extends RMISocketFactory {
         private Optional<RMIServerSocketFactory> server = empty();
         private boolean debug = false;
 
-        public Builder clientSocketFactory(@NonNull RMIEventDispatcherWebsocketFactory client) {
+        public Builder clientSocketFactory(@NonNull RMIEventDispatcherWebSocketFactory client) {
             if( this.client.isPresent() ) throw new IllegalStateException( "RMI Client Socket Factory already set!");
             this.client = Optional.of(client);
             return this;
@@ -46,7 +43,7 @@ public class RMIWebsocketFactoryServer extends RMISocketFactory {
 
         public  RMISocketFactory build() {
             RMISocketFactory def = (debug) ? new RMIDebugSocketFactory() : RMISocketFactory.getDefaultSocketFactory();
-            return new RMIWebsocketFactoryServer(
+            return new RMIWebSocketFactoryServer(
                 client.orElse( def ),
                 server.orElse( def )
             );
@@ -57,7 +54,7 @@ public class RMIWebsocketFactoryServer extends RMISocketFactory {
         return new Builder();
     }
 
-    protected RMIWebsocketFactoryServer(RMIClientSocketFactory client, RMIServerSocketFactory server) {
+    protected RMIWebSocketFactoryServer(RMIClientSocketFactory client, RMIServerSocketFactory server) {
         this.client = client;
         this.server = server;
     }

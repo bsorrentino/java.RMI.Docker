@@ -11,13 +11,13 @@ import org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitial
 import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 
 @Slf4j
-public class RMIWebsocketServerProxy  {
+public class RMIWebSocketServerProxy {
 
 
     final Server server = new Server();
     public final WebSocketProxyListener eventDispatcherlistener = new WebSocketProxyListener();
 
-    public RMIWebsocketServerProxy(int websocket_port) throws Exception {
+    public RMIWebSocketServerProxy(int websocket_port) throws Exception {
 
         final ServerConnector connector = new ServerConnector(server);
         connector.setPort(websocket_port);

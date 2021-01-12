@@ -13,7 +13,7 @@ import java.util.Optional;
 
 import static java.util.Optional.empty;
 
-public class RMIWebsocketFactoryClient extends RMISocketFactory {
+public class RMIWebSocketFactoryClient extends RMISocketFactory {
 
     private final RMIClientSocketFactory client;
     private final RMIServerSocketFactory server;
@@ -24,12 +24,12 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
         private Optional<RMIServerSocketFactory> server = empty();
         private boolean debug = false;
 
-        public Builder clientSocketFactory( @NonNull RMIClientWebsocketFactory client) {
+        public Builder clientSocketFactory( @NonNull RMIClientWebSocketFactory client) {
             if( this.client.isPresent() ) throw new IllegalStateException( "RMI Client Socket Factory already set!");
             this.client = Optional.of(client);
             return this;
         }
-        public Builder serverSocketFactory( @NonNull RMIEventHandlerWebsocketFactory server) {
+        public Builder serverSocketFactory( @NonNull RMIEventHandlerWebSocketFactory server) {
             if( this.server.isPresent() ) throw new IllegalStateException( "RMI Server Socket Factory already set!");
             this.server = Optional.of(server);
             return this;
@@ -40,15 +40,15 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
         }
 
         private RMIServerSocketFactory setServerDebug( RMIServerSocketFactory sf) {
-            if( debug && sf instanceof RMIEventHandlerWebsocketFactory ) {
-                ((RMIEventHandlerWebsocketFactory)sf).setDelegate( RMISocketFactory.getDefaultSocketFactory() );
+            if( debug && sf instanceof RMIEventHandlerWebSocketFactory) {
+                ((RMIEventHandlerWebSocketFactory)sf).setDelegate( RMISocketFactory.getDefaultSocketFactory() );
             }
             return sf;
         }
 
         public  RMISocketFactory build() {
             RMISocketFactory def = (debug) ? new RMIDebugSocketFactory() : RMISocketFactory.getDefaultSocketFactory();
-            return new RMIWebsocketFactoryClient(
+            return new RMIWebSocketFactoryClient(
                 client.orElse( def ),
                 server.map( this::setServerDebug ).orElse( def )
             );
@@ -59,7 +59,7 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
         return new Builder();
     }
 
-    protected RMIWebsocketFactoryClient(RMIClientSocketFactory client, RMIServerSocketFactory server) {
+    protected RMIWebSocketFactoryClient(RMIClientSocketFactory client, RMIServerSocketFactory server) {
         this.client = client;
         this.server = server;
     }

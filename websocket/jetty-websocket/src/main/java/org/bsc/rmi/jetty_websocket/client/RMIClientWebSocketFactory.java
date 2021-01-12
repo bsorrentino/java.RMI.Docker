@@ -8,11 +8,11 @@ import java.net.Socket;
 import java.rmi.server.RMIClientSocketFactory;
 
 @Slf4j
-public class RMIClientWebsocketFactory implements RMIClientSocketFactory {
+public class RMIClientWebSocketFactory implements RMIClientSocketFactory {
 
     public final int websocket_port;
 
-    public RMIClientWebsocketFactory(int websocket_port) {
+    public RMIClientWebSocketFactory(int websocket_port) {
         this.websocket_port = websocket_port;
     }
 

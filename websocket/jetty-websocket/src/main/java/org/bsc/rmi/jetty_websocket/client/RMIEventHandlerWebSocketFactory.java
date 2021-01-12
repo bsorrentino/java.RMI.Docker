@@ -8,14 +8,14 @@ import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 
-public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
+public class RMIEventHandlerWebSocketFactory implements RMIServerSocketFactory {
 
 
-    final RMIWebsocketEventHandlerProxy eventHandlerProxy;
+    final RMIWebSocketEventHandlerProxy eventHandlerProxy;
 
     RMIServerSocketFactory delegate = new RMIDebugServerSocketFactory();
 
-    public RMIEventHandlerWebsocketFactory(@NonNull  RMIWebsocketEventHandlerProxy eventHandlerProxy) {
+    public RMIEventHandlerWebSocketFactory(@NonNull RMIWebSocketEventHandlerProxy eventHandlerProxy) {
         this.delegate = RMISocketFactory.getDefaultSocketFactory();
         this.eventHandlerProxy = eventHandlerProxy;
     }

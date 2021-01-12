@@ -3,10 +3,10 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.bsc.rmi.jetty_websocket.client.RMIClientWebsocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebsocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIWebsocketEventHandlerProxy;
-import org.bsc.rmi.jetty_websocket.client.RMIWebsocketFactoryClient;
+import org.bsc.rmi.jetty_websocket.client.RMIClientWebSocketFactory;
+import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebSocketFactory;
+import org.bsc.rmi.jetty_websocket.client.RMIWebSocketEventHandlerProxy;
+import org.bsc.rmi.jetty_websocket.client.RMIWebSocketFactoryClient;
 import org.bsc.rmi.sample.TemperatureDispatcher;
 import org.bsc.rmi.sample.TemperatureMonitor;
 
@@ -47,19 +47,19 @@ public class TemperatureMonitorClient implements Constants
 
             final String host = InetAddress.getLocalHost().getHostAddress();
 
-            final RMIClientWebsocketFactory wsClient =
-                new RMIClientWebsocketFactory(WEBSOCKET_PORT);
+            final RMIClientWebSocketFactory wsClient =
+                new RMIClientWebSocketFactory(WEBSOCKET_PORT);
 
-            final RMIWebsocketEventHandlerProxy eventHandlerProxy =
-                    new RMIWebsocketEventHandlerProxy(host, WEBSOCKET_PORT, RMI_EVENT_PORT);
+            final RMIWebSocketEventHandlerProxy eventHandlerProxy =
+                    new RMIWebSocketEventHandlerProxy(host, WEBSOCKET_PORT, RMI_EVENT_PORT);
 
 //            final RMIEventHandlerWebsocketFactory wsEventHandler =
 //                    new RMIEventHandlerWebsocketFactory( host, WEBSOCKET_PORT, RMI_EVENT_PORT);
             
             final RMISocketFactory factory =
-                RMIWebsocketFactoryClient.builder()
+                RMIWebSocketFactoryClient.builder()
                         .clientSocketFactory( wsClient )
-                        .serverSocketFactory( new RMIEventHandlerWebsocketFactory(eventHandlerProxy) )
+                        .serverSocketFactory( new RMIEventHandlerWebSocketFactory(eventHandlerProxy) )
                         .debug( true )
                         .build();
 
