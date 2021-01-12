@@ -96,11 +96,11 @@ public class RMIWebSocketServerAdapter extends WebSocketAdapter {
         }
     }
 
-    protected Optional<WebSocketSession> asWebSocketSession(@NonNull Session session ){
+    protected Optional<WebSocketSession> asWebSocketSession(Session session ){
         if( session instanceof WebSocketSession) {
             return Optional.of((WebSocketSession) session);
         }
-        log.warn( "session {} is not WebSocketSession compliant. IGNORED! ");
+        log.warn( (session ==null ) ? "session is null" : "session is not WebSocketSession compliant. IGNORED!" );
         return empty();
     }
 
