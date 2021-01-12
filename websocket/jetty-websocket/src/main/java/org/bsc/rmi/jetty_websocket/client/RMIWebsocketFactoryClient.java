@@ -29,7 +29,7 @@ public class RMIWebsocketFactoryClient extends RMISocketFactory {
             this.client = Optional.of(client);
             return this;
         }
-        public Builder serverSocketFactory( @NonNull RMIServerSocketFactory server) {
+        public Builder serverSocketFactory( @NonNull RMIEventHandlerWebsocketFactory2 server) {
             if( this.server.isPresent() ) throw new IllegalStateException( "RMI Server Socket Factory already set!");
             this.server = Optional.of(server);
             return this;

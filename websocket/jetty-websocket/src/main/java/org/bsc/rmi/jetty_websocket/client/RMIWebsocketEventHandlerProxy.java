@@ -1,17 +1,14 @@
-package org.bsc.rmi.jetty_websocket.server;
+package org.bsc.rmi.jetty_websocket.client;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.WebSocketAdapterEx;
-import org.bsc.rmi.jetty_websocket.WebSocketProxyListener;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.bsc.rmi.jetty_websocket.server.RMIWebsocketServerProxy;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.server.NativeWebSocketServletContainerInitializer;
-import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,9 +16,12 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.Future;
+
+import static java.lang.String.format;
 
 @Slf4j
-public class RMIWebsocketServerProxy  {
+public class RMIWebsocketEventHandlerProxy {
 
     public static class RMISession extends Thread implements Closeable {
         final private WebSocketSession session;
@@ -99,7 +99,7 @@ public class RMIWebsocketServerProxy  {
         }
     }
 
-    public static class Listener extends WebSocketAdapterEx {
+    class Listener extends WebSocketAdapterEx {
 
         private Optional<RMISession> getRMIConnProxy(@NonNull Session sess ) {
             return getBean( sess, RMISession.class);
@@ -122,8 +122,7 @@ public class RMIWebsocketServerProxy  {
             asWebSocketSession( sess ).ifPresent( wsess -> {
                 try {
 
-
-                   //  Attach RMISession to WS Session
+                    //  Attach RMISession to WS Session
                     final RMISession connProxy = new RMISession(wsess, rmi_port);
                     wsess.addBean( connProxy, false);
                     connProxy.start();
@@ -143,7 +142,7 @@ public class RMIWebsocketServerProxy  {
                 try {
 
                     //  Detach RMISession to WS Session
-                    final RMISession proxy = wsess.getBean( RMISession.class);
+                    final RMIWebsocketServerProxy.RMISession proxy = wsess.getBean( RMIWebsocketServerProxy.RMISession.class);
                     wsess.removeBean(proxy);
                     proxy.close();
 
@@ -157,11 +156,8 @@ public class RMIWebsocketServerProxy  {
         }
 
         @Override
-        public void onWebSocketText(String message)
-        {
-            final Session sess = getSession();
-
-            getRMIConnProxy(sess).ifPresent( proxy ->
+        public void onWebSocketText(String message) {
+            getRMIConnProxy(getSession()).ifPresent( proxy ->
                     proxy.setMessage( ByteBuffer.wrap( message.getBytes(StandardCharsets.UTF_8)))
             );
 
@@ -169,10 +165,7 @@ public class RMIWebsocketServerProxy  {
 
         @Override
         public void onWebSocketBinary(byte[] payload, int offset, int len) {
-
-            final Session sess = getSession();
-
-            getRMIConnProxy(sess).ifPresent( proxy ->
+            getRMIConnProxy(getSession()).ifPresent( proxy ->
                     proxy.setMessage( ByteBuffer.wrap( payload, offset, len ) )
             );
         }
@@ -187,44 +180,36 @@ public class RMIWebsocketServerProxy  {
 
     }
 
-    final Server server = new Server();
-    public final WebSocketProxyListener eventDispatcherlistener = new WebSocketProxyListener();
+    final Listener listener = new Listener();
+    final WebSocketClient client = new WebSocketClient();
 
-    public RMIWebsocketServerProxy(int websocket_port) throws Exception {
+    final java.net.URI wsURI;
+    final int rmi_port;
 
-        final ServerConnector connector = new ServerConnector(server);
-        connector.setPort(websocket_port);
-        server.addConnector(connector);
+    public RMIWebsocketEventHandlerProxy(@NonNull String host, int websocket_port, int rmi_port) {
+        this.rmi_port = rmi_port;
 
-        // Setup the basic application "context" for this application at "/"
-        // This is also known as the handler tree (in jetty speak)
-        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
-        server.setHandler(context);
+        final String websocket_path = "rmi/push";
 
-        // Configure specific websocket behavior
-        NativeWebSocketServletContainerInitializer.configure(context,
-                (servletContext, nativeWebSocketConfiguration) ->
-                {
-                    // Configure default max size
-                    nativeWebSocketConfiguration.getPolicy().setMaxTextMessageBufferSize(65535);
+        log.debug("create rmi client socket - host:{} rmi port:{} websocket port:{} websocket path:{}",
+                host,
+                rmi_port,
+                websocket_port, websocket_path);
 
-                    final Listener listener = new Listener();
-                    // Add websockets
-                    nativeWebSocketConfiguration.addMapping("/rmi/pull", (req,res) -> listener);
-                    nativeWebSocketConfiguration.addMapping("/rmi/push", (req,res) -> eventDispatcherlistener);
-                });
-
-        // Add generic filter that will accept WebSocket upgrade.
-        WebSocketUpgradeFilter.configure(context);
+        wsURI = java.net.URI.create(format("ws://%s:%d/%s", host, websocket_port, websocket_path));
 
     }
 
     public void start() throws Exception {
-        server.start();
+        client.start();
+
+        final ClientUpgradeRequest request = new ClientUpgradeRequest();
+        request.setHeader("rmi_port", String.valueOf(rmi_port));
+
+        final Future<Session> sessionFuture = client.connect(listener,wsURI, request);
+
+        sessionFuture.get();
+
+
     }
-
-
-
-
 }

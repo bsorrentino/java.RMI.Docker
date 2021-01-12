@@ -14,6 +14,7 @@ import java.rmi.server.RMIServerSocketFactory;
  * RMIServerSocketFactory invoked on the client to handle event from the server
  *
  */
+@Deprecated
 @Slf4j
 public class RMIEventHandlerWebsocketFactory implements RMIServerSocketFactory {
 
