@@ -32,7 +32,11 @@ public class SampleRemoteClient implements Constants {
         final CompletableFuture<Registry> result = new CompletableFuture<>();
 
         try {
-            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port);
+
+            final RMIClientWebSocketFactory wsClient =
+                    new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
+
+            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, wsClient);
 
             result.complete(reg);
 
@@ -57,7 +61,7 @@ public class SampleRemoteClient implements Constants {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
 
-            for (int time = 1; time <= 10; ++time) {
+            for (int time = 1; time <= 1; ++time) {
 
                 final String justPassResult = robject.justPass("This is a test of the RMI servlet handler");
                 log.info("#{} - sampleRMI.justPass()={}", time, justPassResult);
@@ -84,12 +88,12 @@ public class SampleRemoteClient implements Constants {
 
         System.setSecurityManager(new SecurityManager());
 
-        final RMIClientWebSocketFactory wsClient =
-            new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
+//        final RMIClientWebSocketFactory wsClient =
+//            new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
 
         final RMISocketFactory factory =
             RMIWebSocketFactoryClient.builder()
-                .clientSocketFactory( wsClient )
+                //.clientSocketFactory( wsClient )
                 .debug( true )
                 .build();
 
