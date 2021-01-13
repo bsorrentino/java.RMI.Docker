@@ -2,9 +2,13 @@ package org.bsc.jetty_websocket.sample.rmi;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.rmi.jetty_websocket.server.RMIEventDispatcherWebSocketFactory;
+import org.bsc.rmi.jetty_websocket.server.RMIWebSocketFactoryServer;
 import org.bsc.rmi.jetty_websocket.server.RMIWebSocketServerProxy;
 import org.bsc.rmi.sample.SampleRemote;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
@@ -18,7 +22,7 @@ import static java.lang.String.format;
  * Remote object to receive calls forwarded from the ServletHandler.
  */
 @Slf4j
-public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject implements SampleRemote {
+public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject implements SampleRemote, Constants{
 
     public SampleRemoteServer() throws RemoteException {
         super();
@@ -34,16 +38,32 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
         return "I'm a RMI server";
     }
 
-    /**
-     * You should not need to run this server from the command line.
-     * The ServletHandler class creates its own instance of the
-     * rmiregistry and (optionally) an instance of this class as well.
-     * This main method will not be executed from the ServletHandler.
-     */
+    private static CompletableFuture<Void> startWebSocketServer() {
 
-    static int RMI_PORT  = 1099;
-    static int WEBSOCKET_PORT  = 8887;
+        final CompletableFuture<Void> result = new CompletableFuture<>();
+        try {
+            final RMIWebSocketServerProxy wsServer = new RMIWebSocketServerProxy(WEBSOCKET_PORT);
 
+//            final RMIEventDispatcherWebSocketFactory wsEventDispatcher =
+//                new RMIEventDispatcherWebSocketFactory(wsServer.eventDispatcherlistener);
+
+            wsServer.start();
+
+            final RMISocketFactory factory =
+                RMIWebSocketFactoryServer.builder()
+                    //.clientSocketFactory(wsEventDispatcher)
+                    .debug(true)
+                    .build();
+
+            RMISocketFactory.setSocketFactory( factory );
+
+            result.complete(null);
+        }
+        catch( Exception e ) {
+            result.completeExceptionally(e);
+        }
+        return result;
+    }
 
     private static CompletableFuture<Void> bind( Registry reg ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
@@ -74,32 +94,20 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
         return result;
     }
 
-    private static CompletableFuture<Void> startWebSocketServer( Void param ) {
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        try {
-            final RMIWebSocketServerProxy s = new RMIWebSocketServerProxy(WEBSOCKET_PORT);
-            s.start();
-
-            result.complete( null );
-        }
-        catch( Exception e ) {
-            result.completeExceptionally(e);
-        }
-
-        return result;
-    }
-
     /**
      *
      * @param args
      */
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
 
+        final String host = InetAddress.getLocalHost().getHostAddress();
+        log.info( "Server started on host:{}", host);
+        
         log.debug( "java.security.policy={}", System.getProperty("java.security.policy"));
 
-        createRMIRegistry()
+        startWebSocketServer()
+            .thenCompose( (v) -> createRMIRegistry() )
             .thenCompose( SampleRemoteServer::bind )
-            .thenCompose( SampleRemoteServer::startWebSocketServer )
             .exceptionally( ex -> {
                 log.error("main", ex);
                 return null;

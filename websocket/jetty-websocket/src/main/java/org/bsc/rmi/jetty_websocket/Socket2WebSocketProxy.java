@@ -13,7 +13,8 @@ public class Socket2WebSocketProxy extends Socket {
     public final WebSocketProxyListener listener;
 
     public Socket2WebSocketProxy(@NonNull  String host, int port, @NonNull WebSocketProxyListener listener) throws IOException {
-        super(host, port);
+        super( new FakeSocketImpl() );
+        //super(host, port);
         this.listener = listener;
 
     }

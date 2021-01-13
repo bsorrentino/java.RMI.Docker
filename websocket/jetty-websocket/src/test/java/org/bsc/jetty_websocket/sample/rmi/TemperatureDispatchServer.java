@@ -20,16 +20,16 @@ public class TemperatureDispatchServer implements Constants
     {
         try
         {
+            final String host = InetAddress.getLocalHost().getHostAddress();
+
+            log.info( "Server started on host:{}", host);
+
             final RMIWebSocketServerProxy wsServer = new RMIWebSocketServerProxy(WEBSOCKET_PORT);
 
             final RMIEventDispatcherWebSocketFactory wsEventDispatcher =
                     new RMIEventDispatcherWebSocketFactory(wsServer.eventDispatcherlistener);
 
             wsServer.start();
-
-            final String host = InetAddress.getLocalHost().getHostAddress();
-
-            log.info( "Server started on host:{}", host);
 
             final RMISocketFactory factory =
                 RMIWebSocketFactoryServer.builder()

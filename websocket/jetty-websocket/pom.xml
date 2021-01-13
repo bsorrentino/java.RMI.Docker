@@ -15,7 +15,7 @@
 
     <properties>
         <jetty.version>9.4.35.v20201120</jetty.version>
-        <remotehost>localhost</remotehost>
+        <remotehost></remotehost>
     </properties>
 
     <dependencies>
@@ -70,7 +70,10 @@
                                 <argument>-Djava.util.logging.config.file=${project.basedir}/logging.properties</argument>
                                 <argument>-classpath</argument>
                                 <classpath/>
+                                <argument>org.bsc.jetty_websocket.sample.rmi.SampleRemoteServer</argument>
+<!--
                                 <argument>org.bsc.jetty_websocket.sample.rmi.TemperatureDispatchServer</argument>
+-->
                             </arguments>
                         </configuration>
                     </execution>
@@ -85,7 +88,10 @@
                                 <argument>-Djava.util.logging.config.file=${project.basedir}/logging.properties</argument>
                                 <argument>-classpath</argument>
                                 <classpath/>
+                                <argument>org.bsc.jetty_websocket.sample.rmi.SampleRemoteClient</argument>
+<!--
                                 <argument>org.bsc.jetty_websocket.sample.rmi.TemperatureMonitorClient</argument>
+-->
                                 <argument>${remotehost}</argument>
                             </arguments>
                         </configuration>
