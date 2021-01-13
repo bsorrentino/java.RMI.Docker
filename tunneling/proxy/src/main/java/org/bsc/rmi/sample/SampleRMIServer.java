@@ -1,9 +1,8 @@
 package org.bsc.rmi.sample;
 
 import lombok.extern.java.Log;
-import org.bsc.rmi.proxy.socket.server.RMIDebugServerSocketFactory;
+import org.bsc.rmi.proxy.socket.debug.RMIDebugServerSocketFactory;
 
-import java.rmi.*;
 import java.rmi.registry.Registry;
 import java.rmi.server.*;
 import java.util.concurrent.CompletableFuture;

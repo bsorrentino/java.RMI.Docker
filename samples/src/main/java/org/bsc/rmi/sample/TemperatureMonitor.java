@@ -12,6 +12,10 @@ public class TemperatureMonitor extends UnicastRemoteObject implements Temperatu
 
     public TemperatureMonitor() throws RemoteException {}
 
+    public TemperatureMonitor( int port ) throws RemoteException {
+        super( port );
+    }
+
     @Override
     public void temperatureChanged(double temperature) throws RemoteException {
         log.info("Temperature change event {}", temperature);
