@@ -1,0 +1,13 @@
+FROM openjdk:8
+
+MAINTAINER bartolomeo.sorrentino@softphone.it
+
+# unpack  docker-build.jar in /maven
+ADD . /
+
+WORKDIR /maven
+
+EXPOSE 8081
+
+#ENTRYPOINT ["java", "-jar", "@build.finalName@.jar", ""]
+CMD ./exec.sh
