@@ -56,6 +56,17 @@
 
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                      <manifest>
+                        <addClasspath>true</addClasspath>
+                      </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
@@ -125,24 +136,17 @@
                                 <goals>
                                     <goal>test-jar</goal>
                                 </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/assembly/assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>assemble-all</id>
-                                <!--  phase>package</phase-->
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
+                                <configuration>
+                                    <archive>
+                                      <manifest>
+                                        <addClasspath>true</addClasspath>
+                                        <mainClass>org.bsc.jetty_websocket.sample.rmi.SampleRemoteServer</mainClass>
+                                      </manifest>
+                                      <manifestEntries>
+                                        <Class-Path>jetty-websocket-1.0-SNAPSHOT.jar</Class-Path>
+                                      </manifestEntries>
+                                    </archive>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -155,6 +159,7 @@
                                 <!-- phase>package</phase -->
                                 <goals>
                                     <goal>build</goal>
+                                    <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <images>
@@ -162,13 +167,21 @@
                                             <name>rmiserver</name>
                                             <alias>dockerfile</alias>
                                             <build>
-                                                <contextDir>${project.basedir}/src/assembly</contextDir>
+                                                <contextDir>${project.basedir}/src/main/docker</contextDir>
                                                 <assembly>
-                                                    <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                                                    <descriptor>assembly.xml</descriptor>
                                                 </assembly>
+                                                <dockerFile>Dockerfile</dockerFile>
+                                                <filter>@</filter>
                                             </build>
+                                            <run>
+                                                <ports>
+                                                    <port>8081:8081</port>
+                                                </ports>
+                                            </run>
                                         </image>
                                     </images>
+
                                 </configuration>
                             </execution>
                         </executions>

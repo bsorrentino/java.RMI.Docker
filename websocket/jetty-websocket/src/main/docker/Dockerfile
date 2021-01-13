@@ -5,13 +5,9 @@ MAINTAINER bartolomeo.sorrentino@softphone.it
 # unpack  docker-build.jar in /maven
 ADD . /
 
+WORKDIR /maven
 
-RUN mkdir   /maven/share
+EXPOSE 8081
 
-VOLUME      /maven/share
-
-WORKDIR     /maven
-
-ENTRYPOINT ["java", "-jar", "@build.finalName@.jar"]
-
-
+#ENTRYPOINT ["java", "-jar", "@build.finalName@.jar", ""]
+CMD ./exec.sh
