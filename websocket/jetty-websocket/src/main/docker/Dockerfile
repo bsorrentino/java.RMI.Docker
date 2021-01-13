@@ -7,6 +7,8 @@ ADD . /
 
 WORKDIR /maven
 
+RUN mkdir target
+
 EXPOSE 8081
 
 #ENTRYPOINT ["java", "-jar", "@build.finalName@.jar", ""]

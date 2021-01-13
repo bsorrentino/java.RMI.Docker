@@ -16,6 +16,7 @@ public class RMIWebSocketServerProxy {
 
     final Server server = new Server();
     public final WebSocketProxyListener eventDispatcherlistener = new WebSocketProxyListener();
+    final WebSocketListener listener = new RMIWebSocketServerAdapter();
 
     public RMIWebSocketServerProxy(int websocket_port) throws Exception {
 
@@ -36,11 +37,9 @@ public class RMIWebSocketServerProxy {
                     // Configure default max size
                     nativeWebSocketConfiguration.getPolicy().setMaxTextMessageBufferSize(65535);
 
-                    final WebSocketListener listener = new RMIWebSocketServerAdapter();
-
                     // Add websockets
-                    nativeWebSocketConfiguration.addMapping("/rmi/pull", (req,res) -> listener);
-                    nativeWebSocketConfiguration.addMapping("/rmi/push", (req,res) -> eventDispatcherlistener);
+                    nativeWebSocketConfiguration.addMapping("/rmi/pull/*", (req,res) -> listener);
+                    nativeWebSocketConfiguration.addMapping("/rmi/push/*", (req,res) -> eventDispatcherlistener);
                 });
 
         // Add generic filter that will accept WebSocket upgrade.
