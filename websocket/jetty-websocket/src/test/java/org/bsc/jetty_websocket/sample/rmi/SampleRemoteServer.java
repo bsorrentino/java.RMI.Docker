@@ -24,8 +24,8 @@ import static java.lang.String.format;
 @Slf4j
 public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject implements SampleRemote, Constants{
 
-    public SampleRemoteServer() throws RemoteException {
-        super();
+    public SampleRemoteServer(int rmi_port) throws RemoteException {
+        super(rmi_port);
     }
 
     public String justPass(String passed) throws RemoteException {
@@ -68,7 +68,7 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
     private static CompletableFuture<Void> bind( Registry reg ) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         try {
-            reg.bind( "SampleRMI", new SampleRemoteServer() );
+            reg.bind( "SampleRMI", new SampleRemoteServer(RMI_PORT) );
             result.complete( null );
         } catch (Exception e) {
             result.completeExceptionally(e);
@@ -78,13 +78,10 @@ public class SampleRemoteServer extends java.rmi.server.UnicastRemoteObject impl
 
     private static CompletableFuture<Registry> createRMIRegistry() {
 
-        final RMIServerSocketFactory serverSocketFactory = RMISocketFactory.getDefaultSocketFactory();
-        final RMIClientSocketFactory clientSocketFactory = RMISocketFactory.getDefaultSocketFactory();
-
-        CompletableFuture<Registry> result = new CompletableFuture<>();
+        final CompletableFuture<Registry> result = new CompletableFuture<>();
 
         try {
-            final Registry reg = java.rmi.registry.LocateRegistry.createRegistry(RMI_PORT, clientSocketFactory, serverSocketFactory );
+            final Registry reg = java.rmi.registry.LocateRegistry.createRegistry(RMI_PORT);
 
             result.complete(reg);
 

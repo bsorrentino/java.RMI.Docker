@@ -132,7 +132,6 @@ public class RMIWebSocketServerAdapter extends WebSocketAdapter {
         asWebSocketSession( sess ).ifPresent( wsess -> {
             try {
 
-
                 //  Attach RMISession to WS Session
                 final RMISession connProxy = new RMISession(wsess, rmi_port);
                 wsess.addBean( connProxy, false);
@@ -169,20 +168,14 @@ public class RMIWebSocketServerAdapter extends WebSocketAdapter {
     @Override
     public void onWebSocketText(String message)
     {
-        final Session sess = getSession();
-
-        getRMIConnProxy(sess).ifPresent( proxy ->
+        getRMIConnProxy(getSession()).ifPresent( proxy ->
             proxy.setMessage( ByteBuffer.wrap( message.getBytes(StandardCharsets.UTF_8)))
         );
-
     }
 
     @Override
     public void onWebSocketBinary(byte[] payload, int offset, int len) {
-
-        final Session sess = getSession();
-
-        getRMIConnProxy(sess).ifPresent( proxy ->
+        getRMIConnProxy(getSession()).ifPresent( proxy ->
             proxy.setMessage( ByteBuffer.wrap( payload, offset, len ) )
         );
     }

@@ -42,7 +42,9 @@ public class RMIWebSocketFactoryServer extends RMISocketFactory {
         }
 
         public  RMISocketFactory build() {
-            RMISocketFactory def = (debug) ? new RMIDebugSocketFactory() : RMISocketFactory.getDefaultSocketFactory();
+            final RMISocketFactory def = (debug) ?
+                    new RMIDebugSocketFactory() :
+                    RMISocketFactory.getDefaultSocketFactory();
             return new RMIWebSocketFactoryServer(
                 client.orElse( def ),
                 server.orElse( def )
