@@ -22,6 +22,7 @@
         <module>websocket/java_websocket</module>
         <module>tunneling/proxy</module>
         <module>websocket/jetty-websocket</module>
+        <module>lipermi</module>
     </modules>
 
     <dependencyManagement>
