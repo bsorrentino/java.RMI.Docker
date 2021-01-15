@@ -3,15 +3,11 @@ package org.bsc.jetty_websocket.sample.rmi;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.bsc.rmi.jetty_websocket.client.RMIClientWebSocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIEventHandlerWebSocketFactory;
-import org.bsc.rmi.jetty_websocket.client.RMIWebSocketEventHandlerProxy;
 import org.bsc.rmi.jetty_websocket.client.RMIWebSocketFactoryClient;
 import org.bsc.rmi.sample.SampleRemote;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,7 +32,15 @@ public class SampleRemoteClient implements Constants {
             final RMIClientWebSocketFactory wsClient =
                     new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
 
-            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port, wsClient);
+            final RMISocketFactory factory =
+                RMIWebSocketFactoryClient.builder()
+                    .clientSocketFactory( wsClient )
+                    .debug( true )
+                    .build();
+
+            RMISocketFactory.setSocketFactory( factory );
+
+            final Registry reg = java.rmi.registry.LocateRegistry.getRegistry(host, port /*, wsClient */);
 
             result.complete(reg);
 
@@ -88,16 +92,6 @@ public class SampleRemoteClient implements Constants {
 
         System.setSecurityManager(new SecurityManager());
 
-//        final RMIClientWebSocketFactory wsClient =
-//            new RMIClientWebSocketFactory(host, WEBSOCKET_PORT);
-
-        final RMISocketFactory factory =
-            RMIWebSocketFactoryClient.builder()
-                //.clientSocketFactory( wsClient )
-                .debug( true )
-                .build();
-
-        RMISocketFactory.setSocketFactory( factory );
 
 
         getRMIRegistry(host, RMI_PORT)
@@ -105,7 +99,6 @@ public class SampleRemoteClient implements Constants {
                 .thenCompose(SampleRemoteClient::call)
                 .exceptionally(e -> {
                     log.error("error", e);
-                    //log.throwing(SampleRMIClient.class.getName(), "main", e);
                     return null;
                 })
                 .join();

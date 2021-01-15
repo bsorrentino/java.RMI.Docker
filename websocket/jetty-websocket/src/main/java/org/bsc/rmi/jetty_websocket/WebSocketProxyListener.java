@@ -28,7 +28,7 @@ public class WebSocketProxyListener extends WebSocketAdapter {
     public void onWebSocketText(String message)
     {
         log.debug("onMessage string {}", message);
-        istream.setMessage( ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)) );
+        istream.write( ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)) );
 
     }
 
@@ -36,7 +36,7 @@ public class WebSocketProxyListener extends WebSocketAdapter {
     public void onWebSocketBinary(byte[] payload, int offset, int len)
     {
         log.debug("onMessage bytes {}", len);
-        istream.setMessage( ByteBuffer.wrap(payload,offset,len) );
+        istream.write( ByteBuffer.wrap(payload,offset,len) );
     }
 
     @Override

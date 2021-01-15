@@ -7,6 +7,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import static java.util.Optional.ofNullable;
@@ -23,10 +24,15 @@ public class WebsocketOutputStream<T extends WebSocketAdapter> extends java.io.O
     public void write(int b) throws IOException {
         throw new UnsupportedOperationException("write(int) is not supported!");
     }
+    @Override
+    public void write(byte[] b) throws IOException {
+        throw new UnsupportedOperationException("write(byte[]) is not supported!");
+    }
+
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        log.info( "write bytes( off:{}, len:{}, b.length:{} )", off, len, b.length);
+        log.debug( "write bytes( off:{}, len:{}, b.length:{} )", off, len, b.length);
 
         final Session s = wsListener.getSession();
         if( s == null ) {
@@ -41,5 +47,15 @@ public class WebsocketOutputStream<T extends WebSocketAdapter> extends java.io.O
         }
 
        r.sendBytes( ByteBuffer.wrap(b, off, len) );
+    }
+
+    @Override
+    public void flush() throws IOException {
+        log.debug( "flush" );
+    }
+
+    @Override
+    public void close() throws IOException {
+        log.debug( "close()" );
     }
 }
