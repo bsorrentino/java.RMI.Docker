@@ -155,7 +155,7 @@
                         <artifactId>docker-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>rmiserver</id>
+                                <id>server</id>
                                 <!-- phase>package</phase -->
                                 <goals>
                                     <goal>build</goal>
