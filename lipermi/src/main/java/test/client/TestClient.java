@@ -36,10 +36,10 @@ public class TestClient implements Constants {
 		
 		long init = new Date().getTime();
 		System.out.println("Creating CallHandler");
-		CallHandler callHandler = new CallHandler();
+
 		try {
 			System.out.println("Creating Client");
-			Client client = new Client("localhost", PORT, callHandler, new GZipFilter());
+			Client client = Client.of("localhost", PORT, new GZipFilter());
 			
 			
 			System.out.println("Getting proxy");
@@ -78,7 +78,7 @@ public class TestClient implements Constants {
 				};
 				
 				System.out.println("Exporting listener");
-				callHandler.exportObject(ListenerTest.class, myListener);
+				client.exportObject(ListenerTest.class, myListener);
 				
 				System.out.println("Testing listener");
 				ao.gimmeYourListener(myListener);
@@ -91,7 +91,7 @@ public class TestClient implements Constants {
 			client.close();
 			
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

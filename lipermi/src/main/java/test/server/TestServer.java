@@ -1,6 +1,8 @@
 package test.server;
 
 import lombok.extern.slf4j.Slf4j;
+import net.sf.lipermi.FullDuplexSocketStreamAdapter;
+import net.sf.lipermi.TCPFullDuplexStream;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.CallLookup;
@@ -53,8 +55,9 @@ public class TestServer implements Constants {
 		@Override
 		public String letsDoIt() {
 			log.info("letsDoIt() done.");
-			Socket clientSocket = CallLookup.getCurrentSocket();
-			log.info("My client: " + clientSocket.getRemoteSocketAddress());
+			CallLookup.getCurrentTCPStream().ifPresent( s ->
+				log.info("My client: {}", ((FullDuplexSocketStreamAdapter)s).getSocket().getRemoteSocketAddress() )
+			);
 			return "server saying hi";
 		}
 

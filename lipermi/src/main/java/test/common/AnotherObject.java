@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 public interface AnotherObject extends Serializable {
 	
-	public void test();
+	void test();
 	
-	public int getNumber();
+	int getNumber();
 	
-	public void gimmeYourListener(ListenerTest listener);
+	void gimmeYourListener(ListenerTest listener);
 	
 }

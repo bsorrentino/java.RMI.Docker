@@ -43,8 +43,7 @@ public class LipeRMIBug2 {
     public static void main(String[] args) throws Exception {
         startServer();
 
-        final CallHandler handler = new CallHandler();
-        final Client client = new Client("localhost", 36666, handler);
+        final Client client = Client.of("localhost", 36666);
         final Calc remote = (Calc) client.getGlobal(Calc.class);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
