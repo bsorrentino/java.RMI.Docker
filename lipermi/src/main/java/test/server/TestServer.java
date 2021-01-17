@@ -8,6 +8,7 @@ import net.sf.lipermi.handler.filter.GZipFilter;
 import net.sf.lipermi.net.IServerListener;
 import net.sf.lipermi.net.Server;
 import test.common.AnotherObject;
+import test.common.Constants;
 import test.common.ListenerTest;
 import test.common.TestService;
 
@@ -15,7 +16,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 @Slf4j
-public class TestServer {
+public class TestServer implements Constants {
+
 	static class AnotherObjectImpl implements AnotherObject {
 
 		private static final long serialVersionUID = -1881637933978100698L;
@@ -98,7 +100,7 @@ public class TestServer {
 			callHandler.registerGlobal(TestService.class, service);
 			log.info("Binding");
 
-			server.bind(1234, callHandler, new GZipFilter());
+			server.bind(PORT, callHandler, new GZipFilter());
 
 			log.info("Server listening");
 

@@ -9,6 +9,7 @@ import net.sf.lipermi.handler.filter.GZipFilter;
 import net.sf.lipermi.net.Client;
 
 import test.common.AnotherObject;
+import test.common.Constants;
 import test.common.ListenerTest;
 import test.common.TestService;
 
@@ -28,7 +29,7 @@ import test.common.TestService;
  * @author lipe
  *
  */
-public class TestClient {
+public class TestClient implements Constants {
 	
 	@SuppressWarnings("serial")
 	public static void main(String... args) {
@@ -38,7 +39,7 @@ public class TestClient {
 		CallHandler callHandler = new CallHandler();
 		try {
 			System.out.println("Creating Client");
-			Client client = new Client("localhost", 1234, callHandler, new GZipFilter());
+			Client client = new Client("localhost", PORT, callHandler, new GZipFilter());
 			
 			
 			System.out.println("Getting proxy");
