@@ -1,12 +1,12 @@
 package test.client;
 
-import java.io.IOException;
 import java.util.Date;
+import java.util.Optional;
 
+import net.sf.lipermi.Client;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.GZipFilter;
-import net.sf.lipermi.net.Client;
 
 import test.common.AnotherObject;
 import test.common.Constants;
@@ -39,7 +39,7 @@ public class TestClient implements Constants {
 
 		try {
 			System.out.println("Creating Client");
-			Client client = Client.of("localhost", PORT, new GZipFilter());
+			Client client = new Client("localhost", PORT, new CallHandler(), Optional.of(new GZipFilter()));
 			
 			
 			System.out.println("Getting proxy");

@@ -2,13 +2,12 @@ package test.server;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.lipermi.FullDuplexSocketStreamAdapter;
-import net.sf.lipermi.TCPFullDuplexStream;
+import net.sf.lipermi.IServerListener;
+import net.sf.lipermi.Server;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.CallLookup;
 import net.sf.lipermi.handler.filter.GZipFilter;
-import net.sf.lipermi.net.IServerListener;
-import net.sf.lipermi.net.Server;
 import test.common.AnotherObject;
 import test.common.Constants;
 import test.common.ListenerTest;
@@ -16,6 +15,7 @@ import test.common.TestService;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Optional;
 
 @Slf4j
 public class TestServer implements Constants {
@@ -103,7 +103,7 @@ public class TestServer implements Constants {
 			callHandler.registerGlobal(TestService.class, service);
 			log.info("Binding");
 
-			server.bind(PORT, callHandler, new GZipFilter());
+			server.bind(PORT, callHandler, Optional.of(new GZipFilter()));
 
 			log.info("Server listening");
 

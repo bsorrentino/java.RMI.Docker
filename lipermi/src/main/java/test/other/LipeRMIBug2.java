@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.lipermi.handler.CallHandler;
-import net.sf.lipermi.net.Client;
-import net.sf.lipermi.net.Server;
+import net.sf.lipermi.Client;
+import net.sf.lipermi.Server;
+
+import static java.util.Optional.empty;
 
 public class LipeRMIBug2 {
 
@@ -30,7 +32,7 @@ public class LipeRMIBug2 {
             }
         });
         final Server server = new Server();
-        server.bind(36666, handler);
+        server.bind(36666, handler, empty());
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -43,8 +45,8 @@ public class LipeRMIBug2 {
     public static void main(String[] args) throws Exception {
         startServer();
 
-        final Client client = Client.of("localhost", 36666);
-        final Calc remote = (Calc) client.getGlobal(Calc.class);
+        final Client client = new Client("localhost", 36666, new CallHandler(), empty());
+        final Calc remote = client.getGlobal(Calc.class);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
