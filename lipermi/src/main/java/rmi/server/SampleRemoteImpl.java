@@ -1,7 +1,8 @@
-package rmi;
+package rmi.server;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.lipermi.rmi.UnicastRemoteObject;
+import rmi.SampleRemote;
 
 import java.rmi.RemoteException;
 
