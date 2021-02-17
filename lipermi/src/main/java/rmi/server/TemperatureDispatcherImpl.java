@@ -1,7 +1,9 @@
-package rmi;
+package rmi.server;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.lipermi.rmi.UnicastRemoteObject;
+import rmi.TemperatureDispatcher;
+import rmi.TemperatureListener;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -57,6 +59,8 @@ public class TemperatureDispatcherImpl extends UnicastRemoteObject implements Te
 
     private void notifyTemperatureListeners(double aInTemp)
     {
+        log.info( "notifyTemperatureListeners({})", aInTemp);
+
         for (TemperatureListener lListener : listeners)
         {
             try

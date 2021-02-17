@@ -1,0 +1,4 @@
+[submodule "lipermi-project"]
+	path = lipermi-project
+	url = https://github.com/bsorrentino/lipermi.git
+	branch = develop

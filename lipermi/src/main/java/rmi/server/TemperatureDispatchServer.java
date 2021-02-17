@@ -6,7 +6,6 @@ import net.sf.lipermi.rmi.LocateRegistry;
 import net.sf.lipermi.rmi.Registry;
 import rmi.Constants;
 import rmi.TemperatureDispatcher;
-import rmi.TemperatureDispatcherImpl;
 
 import java.net.InetAddress;
 

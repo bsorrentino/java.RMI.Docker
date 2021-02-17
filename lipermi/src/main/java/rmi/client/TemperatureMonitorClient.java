@@ -9,7 +9,6 @@ import net.sf.lipermi.rmi.UnicastRemoteObject;
 import rmi.Constants;
 import rmi.TemperatureDispatcher;
 import rmi.TemperatureListener;
-import rmi.TemperatureMonitor;
 
 import java.net.InetAddress;
 

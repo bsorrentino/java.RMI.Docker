@@ -1,6 +1,7 @@
-package rmi;
+package rmi.client;
 
 import lombok.extern.slf4j.Slf4j;
+import rmi.TemperatureListener;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
