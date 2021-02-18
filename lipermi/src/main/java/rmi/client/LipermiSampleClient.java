@@ -63,7 +63,7 @@ public class LipermiSampleClient implements Constants
 
             client.lookupDiscovery();
 
-            //client.lookupTemperatureDispatcher();
+            client.lookupTemperatureDispatcher();
 
 
         }

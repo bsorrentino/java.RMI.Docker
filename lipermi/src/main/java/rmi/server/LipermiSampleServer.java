@@ -63,7 +63,7 @@ public class LipermiSampleServer implements Constants
 
             app.registerSampleRemote(reg);
 
-            //app.registerDispatcher(reg);
+            app.registerDispatcher(reg);
 
         }
         catch (Exception aInE)
