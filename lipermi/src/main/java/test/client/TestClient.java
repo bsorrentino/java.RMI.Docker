@@ -41,7 +41,7 @@ public class TestClient implements Constants {
 			final CallHandler callHandler = new CallHandler();
 
 			System.out.println("Creating Client");
-			Client client = new Client("localhost", PORT, callHandler, Optional.of(new GZipFilter()));
+			Client client = new Client("localhost", PORT, callHandler, new GZipFilter());
 			
 			
 			System.out.println("Getting proxy");

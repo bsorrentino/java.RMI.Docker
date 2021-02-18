@@ -6,6 +6,7 @@ import java.util.List;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.Client;
 import net.sf.lipermi.Server;
+import net.sf.lipermi.handler.filter.DefaultFilter;
 
 import static java.util.Optional.empty;
 
@@ -45,7 +46,7 @@ public class LipeRMIBug2 {
     public static void main(String[] args) throws Exception {
         startServer();
 
-        final Client client = new Client("localhost", 36666, new CallHandler(), empty());
+        final Client client = new Client("localhost", 36666, new CallHandler(), new DefaultFilter());
         final Calc remote = client.getGlobal(Calc.class);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

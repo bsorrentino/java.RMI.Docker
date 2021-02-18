@@ -12,19 +12,21 @@ import rmi.TemperatureDispatcher;
 import java.net.InetAddress;
 
 @Slf4j
-public class SampleServer implements Constants
+public class LipermiSampleServer implements Constants
 {
     final TemperatureDispatcherImpl lServer;
     final SampleRemoteImpl sample;
     final SampleRemoteDiscoveryImpl discovery;
 
-    public SampleServer() throws Exception  {
+    public LipermiSampleServer() throws Exception  {
         this.lServer =  new TemperatureDispatcherImpl();
         this.sample = new SampleRemoteImpl();
         this.discovery = new SampleRemoteDiscoveryImpl();
     }
 
     void registerDispatcher( Registry reg ) throws Exception {
+
+        log.trace( "registerDispatcher");
 
         reg.rebind(TemperatureDispatcher.class,lServer);
 
@@ -35,10 +37,12 @@ public class SampleServer implements Constants
     }
 
     void registerSampleRemote( Registry reg ) throws Exception {
+        log.trace( "registerSampleRemote");
         reg.bind( SampleRemote.class, sample );
     }
 
     void registerSampleDiscovery( Registry reg ) throws Exception {
+        log.trace( "registerSampleDiscovery");
         reg.bind( SampleRemoteDiscovery.class, discovery );
     }
 
@@ -46,7 +50,7 @@ public class SampleServer implements Constants
     {
         try
         {
-            final SampleServer app = new SampleServer();
+            final LipermiSampleServer app = new LipermiSampleServer();
 
             final String host = InetAddress.getLocalHost().getHostAddress();
 
@@ -59,7 +63,7 @@ public class SampleServer implements Constants
 
             app.registerSampleRemote(reg);
 
-            app.registerDispatcher(reg);
+            //app.registerDispatcher(reg);
 
         }
         catch (Exception aInE)

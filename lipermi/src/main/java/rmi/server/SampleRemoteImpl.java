@@ -5,14 +5,18 @@ import net.sf.lipermi.rmi.UnicastRemoteObject;
 import rmi.SampleRemote;
 
 import java.rmi.RemoteException;
+import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Optional.empty;
 
 /**
  * Remote object to receive calls forwarded from the ServletHandler.
  */
 @Slf4j
 public class SampleRemoteImpl extends UnicastRemoteObject implements SampleRemote {
+
+    Optional<String> notSerializableAttribute = empty();
 
     public SampleRemoteImpl() throws RemoteException {
         super();
