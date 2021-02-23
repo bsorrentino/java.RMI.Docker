@@ -25,17 +25,20 @@ public class LipermiSampleClient implements Constants
         remoteDiscovery = reg.lookup( SampleRemoteDiscovery.class );
     }
 
-    public void lookupTemperatureDispatcher() throws Exception {
+    public void lookupTemperatureDispatcher(SampleRemote remote) throws Exception {
 
         // Display the current temperature
         log.info("Origin Temperature {}", temperatureDispatcher.getTemperature());
 
         final TemperatureMonitor lTemperatureMonitor = new TemperatureMonitor(RMI_EVENT_PORT);
         UnicastRemoteObject.exportObject(TemperatureListener.class,lTemperatureMonitor);
+
+        lTemperatureMonitor.setRemote(remote);
+
         temperatureDispatcher.addTemperatureListener( lTemperatureMonitor );
     }
 
-    public void lookupDiscovery() throws Exception {
+    public SampleRemote lookupDiscovery() throws Exception {
 
         final SampleRemote remote = remoteDiscovery.lookup( "test");
 
@@ -43,6 +46,7 @@ public class LipermiSampleClient implements Constants
 
         log.info( "get info: {}", info );
 
+        return remote;
 
     }
 
@@ -61,9 +65,7 @@ public class LipermiSampleClient implements Constants
 
             final LipermiSampleClient client = new LipermiSampleClient(reg);
 
-            client.lookupDiscovery();
-
-            client.lookupTemperatureDispatcher();
+            client.lookupTemperatureDispatcher( client.lookupDiscovery() );
 
 
         }
