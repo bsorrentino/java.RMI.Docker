@@ -19,8 +19,10 @@ public class LipermiSampleClient implements Constants
     final  TemperatureDispatcher temperatureDispatcher;
     final SampleRemoteDiscovery remoteDiscovery;
 
+    final Registry reg;
 
     public LipermiSampleClient( @NonNull  Registry reg ) throws Exception {
+        this.reg = reg;
         temperatureDispatcher = reg.lookup(TemperatureDispatcher.class);
         remoteDiscovery = reg.lookup( SampleRemoteDiscovery.class );
     }
@@ -31,7 +33,7 @@ public class LipermiSampleClient implements Constants
         log.info("Origin Temperature {}", temperatureDispatcher.getTemperature());
 
         final TemperatureMonitor lTemperatureMonitor = new TemperatureMonitor(RMI_EVENT_PORT);
-        UnicastRemoteObject.exportObject(TemperatureListener.class,lTemperatureMonitor);
+        reg.bind(TemperatureListener.class,lTemperatureMonitor);
 
         lTemperatureMonitor.setRemote(remote);
 
