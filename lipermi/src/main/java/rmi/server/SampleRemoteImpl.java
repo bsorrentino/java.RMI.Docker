@@ -29,6 +29,7 @@ public class SampleRemoteImpl extends UnicastRemoteObject implements SampleRemot
 
     @Override
     public String getInfo() throws RemoteException {
+        log.info( "getInfo()" );
         return "I'm a RMI server";
     }
 
