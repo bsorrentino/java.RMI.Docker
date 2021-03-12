@@ -46,7 +46,7 @@
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>test.server.TestServer</mainClass>
+                                    <mainClass>rmi.server.LipermiSampleServer</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>
