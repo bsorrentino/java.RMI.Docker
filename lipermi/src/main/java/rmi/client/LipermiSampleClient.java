@@ -4,6 +4,7 @@ package rmi.client;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.lipermi.rmi.LocateRegistry;
+import net.sf.lipermi.rmi.RMISocketRegistryImpl;
 import net.sf.lipermi.rmi.Registry;
 import net.sf.lipermi.rmi.UnicastRemoteObject;
 import rmi.*;
@@ -58,6 +59,8 @@ public class LipermiSampleClient implements Constants
      */
     public static void main(String[] args)
     {
+        LocateRegistry.registerRegistryProvider( RMISocketRegistryImpl::new );
+
         try {
             final String host = (args.length < 1 || args[0].isEmpty()) ? InetAddress.getLocalHost().getHostAddress() : args[0];
 

@@ -1,16 +1,17 @@
 package test.other;
 
-import net.sf.lipermi.Client;
-import net.sf.lipermi.Server;
+import net.sf.lipermi.SocketClient;
+import net.sf.lipermi.SocketServer;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.DefaultFilter;
 
-import static java.util.Optional.empty;
+import java.io.IOException;
 
 public class LipeRMIBug {
 
+    @FunctionalInterface
     public interface Calc {
-        public double sqrt(double d);
+        double sqrt(double d);
     }
 
 
@@ -22,21 +23,21 @@ public class LipeRMIBug {
                 return Math.sqrt(d);
             }
         });
-        final Server server = new Server();
-        server.bind(36666, handler, empty());
+        final SocketServer server = new SocketServer();
+        server.bind(36666, handler, null);
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                server.close();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread( () -> {
+                try {
+                    server.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }}));
     }
 
     public static void main(String[] args) throws Exception {
         startServer();
 
-        final Client client = new Client("localhost", 36666, new CallHandler(), new DefaultFilter());
+        final SocketClient client = new SocketClient("localhost", 36666, new CallHandler(), new DefaultFilter());
         final Calc remote = client.getGlobal(Calc.class);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

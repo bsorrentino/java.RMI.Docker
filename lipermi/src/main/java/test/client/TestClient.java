@@ -1,9 +1,8 @@
 package test.client;
 
 import java.util.Date;
-import java.util.Optional;
 
-import net.sf.lipermi.Client;
+import net.sf.lipermi.SocketClient;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.GZipFilter;
@@ -32,7 +31,7 @@ import test.common.TestService;
 public class TestClient implements Constants {
 	
 	@SuppressWarnings("serial")
-	public static void main(String... args) {
+	public static void main(String... args) throws Exception {
 		
 		long init = new Date().getTime();
 		System.out.println("Creating CallHandler");
@@ -41,7 +40,7 @@ public class TestClient implements Constants {
 			final CallHandler callHandler = new CallHandler();
 
 			System.out.println("Creating Client");
-			Client client = new Client("localhost", PORT, callHandler, new GZipFilter());
+			SocketClient client = new SocketClient("localhost", PORT, callHandler, new GZipFilter());
 			
 			
 			System.out.println("Getting proxy");

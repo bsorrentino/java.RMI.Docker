@@ -2,8 +2,7 @@ package test.server;
 
 import lombok.extern.slf4j.Slf4j;
 import net.sf.lipermi.FullDuplexSocketStreamAdapter;
-import net.sf.lipermi.IServerListener;
-import net.sf.lipermi.Server;
+import net.sf.lipermi.SocketServer;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.CallLookup;
@@ -81,16 +80,7 @@ public class TestServer implements Constants {
 	public TestServer() {
 
 		log.info("Creating Server");
-		Server server = new Server();
-		server.addServerListener(new IServerListener() {
-			public void clientConnected(Socket socket) {
-				log.info("Client connected: " + socket.getInetAddress());
-			}
-
-			public void clientDisconnected(Socket socket) {
-				log.info("Client disconnected: " + socket.getInetAddress());
-			}
-		});
+		SocketServer server = new SocketServer();
 
 		log.info("Creating CallHandler");
 
@@ -103,7 +93,7 @@ public class TestServer implements Constants {
 			callHandler.registerGlobal(TestService.class, service);
 			log.info("Binding");
 
-			server.bind(PORT, callHandler, Optional.of(new GZipFilter()));
+			server.bind(PORT, callHandler, new GZipFilter());
 
 			log.info("Server listening");
 
