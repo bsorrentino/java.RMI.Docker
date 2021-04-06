@@ -4,20 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.lipermi.SocketClient;
-import net.sf.lipermi.SocketServer;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.DefaultFilter;
-
-import static java.util.Optional.empty;
+import net.sf.lipermi.socket.SocketClient;
+import net.sf.lipermi.socket.SocketServer;
 
 public class LipeRMIBug2 {
 
     public interface Calc {
         List<Integer> add(int i);
     }
-
-
 
     private static void startServer() throws Exception {
         final CallHandler handler = new CallHandler();

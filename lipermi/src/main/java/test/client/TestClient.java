@@ -2,11 +2,11 @@ package test.client;
 
 import java.util.Date;
 
-import net.sf.lipermi.SocketClient;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.GZipFilter;
 
+import net.sf.lipermi.socket.SocketClient;
 import test.common.AnotherObject;
 import test.common.Constants;
 import test.common.ListenerTest;
@@ -61,15 +61,12 @@ public class TestClient implements Constants {
 			AnotherObject ao = myServiceCaller.getAnotherObject();
 			System.out.println("return: " + ao);
 
-			System.out.println("AnotherObject::getNumber(): " + ao.getNumber());			
-
+			System.out.println("AnotherObject::getNumber(): " + ao.getNumber());
 			
 			System.out.println("----");
 			System.out.println("ok, listener tests:");
 			System.out.println("----");
-			
 
-			
 			try {
 				System.out.println("Creating listener");
 				ListenerTest myListener = new ListenerTest() {
