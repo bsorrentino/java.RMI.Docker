@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.GZipFilter;
-import net.sf.lipermi.socket.SocketServer;
+import net.sf.lipermi.SocketServer;
 import test.common.AnotherObject;
 import test.common.Constants;
 import test.common.ListenerTest;

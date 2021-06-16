@@ -6,7 +6,7 @@ import net.sf.lipermi.exception.LipeRMIException;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.GZipFilter;
 
-import net.sf.lipermi.socket.SocketClient;
+import net.sf.lipermi.SocketClient;
 import test.common.AnotherObject;
 import test.common.Constants;
 import test.common.ListenerTest;

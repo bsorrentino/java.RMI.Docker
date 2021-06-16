@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.lipermi.SocketClient;
+import net.sf.lipermi.SocketServer;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.filter.DefaultFilter;
-import net.sf.lipermi.socket.SocketClient;
-import net.sf.lipermi.socket.SocketServer;
 
 public class LipeRMIBug2 {
 
