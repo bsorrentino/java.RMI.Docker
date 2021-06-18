@@ -29,7 +29,7 @@ public class TemperatureDispatcherImpl extends UnicastRemoteObject implements Te
         final Random lRandom = new Random();
         while (true)
         {
-            int duration = lRandom.nextInt() % 10000 + 2000;
+            int duration = lRandom.nextInt(5000) % 5000 + 100;
             if (duration < 0)
             {
                 duration = duration * -1;

@@ -18,9 +18,9 @@
     </properties>
 
     <modules>
-
+    <!--
         <module>lipermi-project</module>
-
+    -->
         <module>samples</module>
         <module>websocket/java_websocket</module>
         <module>tunneling/proxy</module>
